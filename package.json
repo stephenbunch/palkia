@@ -1,10 +1,11 @@
 {
   "name": "@stephenbunch/di",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Dependency injection library.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "gulp"
   },
   "repository": {
     "type": "git",
@@ -12,8 +13,8 @@
   },
   "author": "Stephen Bunch",
   "license": "MIT",
-  "dependencies": {
-    "@stephenbunch/buildpack": "^0.0.1",
+  "devDependencies": {
+    "@stephenbunch/buildpack": "^0.1.0",
     "gulp": "^3.8.11"
   }
 }

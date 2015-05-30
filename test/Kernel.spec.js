@@ -36,7 +36,7 @@ describe( 'Kernel', function() {
     });
   });
 
-  describe( '.registerFactory( factory )', function() {
+  describe( '.registerFactory( name, factory )', function() {
     it( 'should take a function', function() {
       var kernel = new Kernel();
       kernel.registerFactory( 'foo', () => 2 );
@@ -57,6 +57,16 @@ describe( 'Kernel', function() {
       factory.$inject = [ 'bar' ];
       kernel.registerFactory( 'foo', factory );
       expect( kernel.resolve( 'foo' ) ).to.equal( 4 );
+    });
+  });
+
+  describe( '.registerFactoryAsSingleton( name, factory )', function() {
+    it( 'should cache the returned value for all future requests', function() {
+      var kernel = new Kernel();
+      kernel.registerFactoryAsSingleton( 'foo', () => {
+        return {};
+      });
+      expect( kernel.resolve( 'foo' ) ).to.equal( kernel.resolve( 'foo' ) );
     });
   });
 

@@ -136,6 +136,25 @@ export default class Kernel {
   }
 
   /**
+   * Registers a factory with the kernel who's value will be cached for all
+   * future requests.
+   * @param {String} name
+   * @param {Factory} factory
+   */
+  registerFactoryAsSingleton( name, factory ) {
+    validateFactory( factory );
+    var instance;
+    this.delegate( name, name => {
+      return () => {
+        if ( instance === undefined ) {
+          instance = this.factoryFrom( factory )();
+        }
+        return instance;
+      };
+    });
+  }
+
+  /**
    * Unregisters a service.
    * @param {String} name
    */

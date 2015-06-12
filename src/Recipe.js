@@ -17,10 +17,5 @@ export default class Recipe {
      * @type {Array.<String|Factory>}
      */
     this.ingredients = value.ingredients || [];
-
-    /**
-     * @type {Boolean}
-     */
-    this.lazy = value.lazy || false;
   }
 };

@@ -17,33 +17,33 @@ export default class Linker {
     this.delegate = null;
   }
 
+  /**
+   * @param {Recipe} recipe
+   * @returns {Function}
+   */
   factoryFromRecipe( recipe ) {
-    if ( recipe.lazy ) {
-      return this._factoryForLazyRecipe( recipe );
-    }
     var component = new Component( recipe );
     var stack = [ component ];
     while ( stack.length > 0 ) {
       let component = stack.shift();
-      if ( !component.recipe.lazy ) {
-        component.recipe.ingredients.forEach( ( ingredient, index ) => {
-          var recipe =
-            typeof ingredient === 'string' ?
-            this.delegate.recipeForName( ingredient, component.recipe.name ) :
-            recipeFromFactory( ingredient );
-          var child = this._makeChildComponent( component, recipe, index );
-          stack.push( child );
-        });
-      }
+      component.recipe.ingredients.forEach( ( ingredient, index ) => {
+        var recipe =
+          typeof ingredient === 'string' ?
+          this.delegate.recipeForName( ingredient, component.recipe.name ) :
+          recipeFromFactory( ingredient );
+        var child = this._makeChildComponent( component, recipe, index );
+        stack.push( child );
+      });
     }
     return this._factoryFromComponent( component );
   }
 
+  /**
+   * @param {Recipe} recipe
+   * @returns {Promise.<Function>}
+   */
   factoryFromRecipeAsync( recipe ) {
     return Promise.resolve().then( () => {
-      if ( recipe.lazy ) {
-        return this._factoryForLazyRecipe( recipe );
-      }
       var component = new Component( recipe );
       return (
         function resolve( component ) {
@@ -58,8 +58,6 @@ export default class Linker {
                   recipies[ ingredient ] :
                   recipeFromFactory( ingredient );
                 return this._makeChildComponent( component, recipe, index );
-              }).filter( child => {
-                return !child.recipe.lazy;
               }).map( resolve )
             );
           });
@@ -70,15 +68,17 @@ export default class Linker {
     });
   }
 
+  /**
+   * @param {Component} component
+   * @returns {Function}
+   */
   _factoryFromComponent( component ) {
     var components = [];
     var stack = [ component ];
     while ( stack.length > 0 ) {
       let cmp = stack.shift();
       components.push( cmp );
-      if ( !cmp.recipe.lazy ) {
-        stack = stack.concat( cmp.children );
-      }
+      stack = stack.concat( cmp.children );
     }
     components.reverse().pop();
 
@@ -92,22 +92,6 @@ export default class Linker {
       args = component.prep.concat( args );
       component.prep = [];
       return component.recipe.create.apply( undefined, args );
-    };
-  }
-
-  /**
-   * @param {Recipe} recipe
-   * @returns {Function}
-   */
-  _factoryForLazyRecipe( recipe ) {
-    return () => {
-      return Promise.resolve().then( () => {
-        recipe = new Recipe( recipe );
-        recipe.lazy = false;
-        return this.factoryFromRecipeAsync( recipe ).then( factory => {
-          return factory();
-        });
-      });
     };
   }
 

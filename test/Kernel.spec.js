@@ -2,7 +2,7 @@ import {
   Kernel,
   ServiceNotFoundError,
   InvalidOperationError
-} from '../index';
+} from '../src/index';
 
 describe( 'Kernel', function() {
   describe( '.resolve( name )', function() {
@@ -30,8 +30,9 @@ describe( 'Kernel', function() {
 
     it( 'should return a promise if the lazy syntax is used', async function() {
       var kernel = new Kernel();
-      kernel.register( 'foo', 2 );
       var lazyFoo = kernel.resolve( 'foo...' );
+      expect( lazyFoo ).to.be.a.instanceof( Promise )
+      kernel.register( 'foo', 2 );
       expect( await lazyFoo ).to.equal( 2 );
     });
   });

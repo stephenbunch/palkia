@@ -32,6 +32,9 @@ export function matchFromPattern( pattern ) {
  * @returns {Promise}
  */
 export function when( promises ) {
+  if ( promises.length === 0 ) {
+    return Promise.resolve();
+  }
   return new Promise( function( resolve, reject ) {
     var count = promises.length;
     var results = [];

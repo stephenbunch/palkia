@@ -9,6 +9,7 @@ export default class Kernel {
     this._registry = new Registry();
     this._linker = new Linker();
     this._linker.delegate = this._registry;
+    this._registry.delegate = this._linker;
   }
 
   /**
@@ -144,14 +145,12 @@ export default class Kernel {
   registerFactoryAsSingleton( name, factory ) {
     validateFactory( factory );
     var instance;
-    this.delegate( name, name => {
-      return () => {
-        if ( instance === undefined ) {
-          instance = this.factoryFrom( factory )();
-        }
-        return instance;
-      };
-    });
+    this._registry.factories[ name ] = () => {
+      if ( instance === undefined ) {
+        instance = this.factoryFrom( factory )();
+      }
+      return instance;
+    };
   }
 
   /**

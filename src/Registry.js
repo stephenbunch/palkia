@@ -29,6 +29,11 @@ import InvalidOperationError from './InvalidOperationError';
  * @returns {String|undefined}
  */
 
+ /**
+  * @typedef {Object} RegisteryDelegate
+  * @property {Function} factoryFromRecipeAsync
+  */
+
 export default class Registry {
   constructor() {
     /**
@@ -55,6 +60,11 @@ export default class Registry {
      * @type {Boolean}
      */
     this.nullOnMissing = false;
+
+    /**
+     * @type {RegisteryDelegate}
+     */
+    this.delegate = null;
   }
 
   /**
@@ -63,11 +73,18 @@ export default class Registry {
    * @returns {Recipe}
    */
   recipeForName( name, target ) {
-    var recipe = this._recipeFromNameForTarget( name, target );
+    name = this._resolveName( name, target );
     return this._recipeFromFactory(
-      recipe,
-      this._locateFactory( recipe.name, target )
+      name,
+      this._locateFactory( name, target )
     );
+  }
+
+  recipeForNameAsync( name, target ) {
+    name = this._resolveName( name, target );
+    return this._locateFactoryAsync( name, target ).then( factory => {
+      return this._recipeFromFactory( name, factory );
+    });
   }
 
   /**
@@ -76,17 +93,17 @@ export default class Registry {
    * @returns {Promise.<Object.<String, Recipe>>}
    */
   recipesByNameAsync( names, target ) {
-    var recipes = distinct( names ).map( name => {
-      return this._recipeFromNameForTarget( name, target );
+    names = distinct( names ).map( name => {
+      return this._resolveName( name, target );
     });
     return when(
-      recipes.map( recipe => this._locateFactoryAsync( recipe.name, target ) )
+      names.map( name => this._locateFactoryAsync( name, target ) )
     ).then( factories => {
-      return recipes.reduce( ( result, recipe, index ) => {
-        recipe = this._recipeFromFactory( recipe, factories[ index ] );
-        result[ recipe.name ] = recipe;
-        return result;
-      }, {} );
+      var recipes = {};
+      for ( let i = 0; i < names.length; i++ ) {
+        recipes = this._recipeFromFactory( name, factories[ i ] );
+      }
+      return recipes;
     });
   }
 
@@ -117,35 +134,18 @@ export default class Registry {
   }
 
   /**
-   * @param {String} recipe
-   * @param {String|null} target
-   * @returns {Recipe}
-   */
-  _recipeFromNameForTarget( name, target ) {
-    var recipe = new Recipe();
-    if ( /\.\.\.$/.test( name ) ) {
-      recipe.lazy = true;
-      name = name.substr( 0, name.length - 3 );
-    }
-    recipe.name = this._resolveName( name, target );
-    return recipe;
-  }
-
-  /**
    * Returns a new recipe by combining the first recipe with the details from
    * the factory.
-   * @param {Recipe} recipe
+   * @param {String} name
    * @param {Factory} factory
    * @returns {Recipe}
    */
-  _recipeFromFactory( recipe, factory ) {
+  _recipeFromFactory( name, factory ) {
     var { ingredients, create } = recipeFromFactory( factory );
-    var { name, lazy } = recipe;
     return new Recipe({
       name: name,
       create: create,
-      ingredients: ingredients,
-      lazy: lazy
+      ingredients: ingredients
     });
   }
 
@@ -155,6 +155,9 @@ export default class Registry {
    * @returns {Factory}
    */
   _locateFactory( name, target ) {
+    if ( this._isLazy( name ) ) {
+      return this._factoryForLazy( name, target );
+    }
     if ( this.factories[ name ] ) {
       return this.factories[ name ];
     }
@@ -179,6 +182,9 @@ export default class Registry {
    * @returns {Promise.<Factory>}
    */
   _locateFactoryAsync( name, target ) {
+    if ( this._isLazy( name ) ) {
+      return Promise.resolve( this._factoryForLazy( name, target ) );
+    }
     var resolvers = this.asyncResolvers.slice();
     return Promise.resolve().then( () => {
       return (
@@ -198,5 +204,33 @@ export default class Registry {
       }
       return this._locateFactory( name, target );
     });
+  }
+
+  /**
+   * @param {String} name
+   * @returns {Boolean}
+   */
+  _isLazy( name ) {
+    return /\.\.\.$/.test( name );
+  }
+
+  /**
+   * @param {String} name
+   * @returns {Factory}
+   */
+  _factoryForLazy( name, target ) {
+    name = name.substr( 0, name.length - 3 );
+    return () => {
+      // Only resolve things once the promise is awaited on.
+      var promise = Promise.resolve();
+      promise.then = ( ...args ) => {
+        var promise = Promise.resolve()
+          .then( () => this.recipeForNameAsync( name, target ) )
+          .then( recipe => this.delegate.factoryFromRecipeAsync( recipe ) )
+          .then( factory => factory() );
+        return promise.then.apply( promise, args );
+      };
+      return promise;
+    };
   }
 };

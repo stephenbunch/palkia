@@ -14,7 +14,7 @@
   "author": "Stephen Bunch",
   "license": "MIT",
   "devDependencies": {
-    "@stephenbunch/buildpack": "^0.1.0",
+    "@stephenbunch/buildpack": "^0.2.0",
     "gulp": "^3.8.11"
   }
 }

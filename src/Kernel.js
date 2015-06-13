@@ -3,13 +3,14 @@ import Registry from './Registry';
 import Linker from './Linker';
 import AmdResolver from './AmdResolver';
 import CommonJsResolver from './CommonJsResolver';
+import LazyResolver from './LazyResolver';
 
 export default class Kernel {
   constructor() {
-    this._registry = new Registry();
-    this._linker = new Linker();
-    this._linker.delegate = this._registry;
-    this._registry.delegate = this._linker;
+    this.registry = new Registry();
+    this.linker = new Linker();
+    this.linker.delegate = this.registry;
+    this.registry.resolvers.push( new LazyResolver( this ) );
   }
 
   /**
@@ -18,13 +19,14 @@ export default class Kernel {
    */
   useModules( options ) {
     options = options || {};
-    var resolver;
     if ( typeof define === 'function' && define.amd ) {
-      resolver = new AmdResolver( options.requireContext || global.requirejs );
-      this._registry.asyncResolvers.push( name => resolver.resolveAsync( name ) );
+      this.registry.asyncResolvers.push(
+        new AmdResolver( options.requireContext || global.requirejs )
+      );
     } else if ( typeof exports === 'object' ) {
-      resolver = new CommonJsResolver( options.baseDir );
-      this._registry.resolvers.push( name => resolver.resolve( name ) );
+      this.registry.resolvers.push(
+        new CommonJsResolver( options.baseDir )
+      );
     }
     return this;
   }
@@ -34,7 +36,7 @@ export default class Kernel {
    * @returns {Kernel}
    */
   returnNullOnMissing( enable = true ) {
-    this._registry.nullOnMissing = enable;
+    this.registry.nullOnMissing = enable;
     return this;
   }
 
@@ -84,7 +86,7 @@ export default class Kernel {
    * @returns {Function}
    */
   factoryFrom( name, target, locals ) {
-    return this._linker.factoryFromRecipe(
+    return this.linker.factoryFromRecipe(
       this._recipeFromArgs( name, target, locals )
     );
   }
@@ -96,7 +98,7 @@ export default class Kernel {
    * @returns {Promise.<Function>}
    */
   factoryFromAsync( name, target, locals ) {
-    return this._linker.factoryFromRecipeAsync(
+    return this.linker.factoryFromRecipeAsync(
       this._recipeFromArgs( name, target, locals )
     );
   }
@@ -133,7 +135,7 @@ export default class Kernel {
    */
   registerFactory( name, factory ) {
     validateFactory( factory );
-    this._registry.factories[ name ] = factory;
+    this.registry.factories[ name ] = factory;
   }
 
   /**
@@ -145,7 +147,7 @@ export default class Kernel {
   registerFactoryAsSingleton( name, factory ) {
     validateFactory( factory );
     var instance;
-    this._registry.factories[ name ] = () => {
+    this.registry.factories[ name ] = () => {
       if ( instance === undefined ) {
         instance = this.factoryFrom( factory )();
       }
@@ -158,7 +160,7 @@ export default class Kernel {
    * @param {String} name
    */
   unregister( name ) {
-    delete this._registry.factories[ name ];
+    delete this.registry.factories[ name ];
   }
 
   /**
@@ -168,9 +170,11 @@ export default class Kernel {
    */
   redirect( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this._registry.redirects.push( function( name, target ) {
-      if ( match( name ) ) {
-        return handler( name, target );
+    this.registry.redirects.push({
+      redirect( name, target ) {
+        if ( match( name ) ) {
+          return handler( name, target );
+        }
       }
     });
   }
@@ -182,9 +186,11 @@ export default class Kernel {
    */
   delegate( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this._registry.resolvers.push( function( name, target ) {
-      if ( match( name ) ) {
-        return handler( name, target );
+    this.registry.resolvers.push({
+      resolve( name, target ) {
+        if ( match( name ) ) {
+          return handler( name, target );
+        }
       }
     });
   }
@@ -196,12 +202,14 @@ export default class Kernel {
    */
   delegateAsync( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this._registry.asyncResolvers.push( function( name, target ) {
-      return Promise.resolve().then( () => {
-        if ( match( name ) ) {
-          return handler( name, target );
-        }
-      });
+    this.registry.asyncResolvers.push({
+      resolveAsync( name, target ) {
+        return Promise.resolve().then( () => {
+          if ( match( name ) ) {
+            return handler( name, target );
+          }
+        });
+      }
     });
   }
 
@@ -214,7 +222,7 @@ export default class Kernel {
    * @returns {Recipe}
    */
   _recipeFromArgs( name, target, locals ) {
-    if ( typeof name !== 'string' ) {
+    if ( name && typeof name !== 'string' ) {
       locals = target;
       target = name;
       name = null;

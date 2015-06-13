@@ -9,30 +9,40 @@ import ServiceNotFoundError from './ServiceNotFoundError';
 import InvalidOperationError from './InvalidOperationError';
 
 /**
- * @callback ResolveHandler
+ * @typedef ResolveHandler
+ * @property {ResolveFunction} resolve
+ */
+
+/**
+ * @typedef AsyncResolveHandler
+ * @property {AsyncResolveFunction} resolveAsync
+ */
+
+/**
+ * @typedef RedirectHandler
+ * @property {RedirectFunction} redirect
+ */
+
+/**
+ * @callback ResolveFunction
  * @param {String} name
  * @param {String} [target] The name of the target being resolved for.
  * @returns {Factory|undefined}
  */
 
  /**
-  * @callback AsyncResolveHandler
+  * @callback AsyncResolveFunction
   * @param {String} name
   * @param {String} [target] The name of the target being resolved for.
   * @returns {Promise.<Factory|undefined>}
   */
 
 /**
- * @callback RedirectHandler
+ * @callback RedirectFunction
  * @param {String} name
  * @param {String} [target] The name of the target being resolved for.
  * @returns {String|undefined}
  */
-
- /**
-  * @typedef {Object} RegisteryDelegate
-  * @property {Function} factoryFromRecipeAsync
-  */
 
 export default class Registry {
   constructor() {
@@ -60,11 +70,6 @@ export default class Registry {
      * @type {Boolean}
      */
     this.nullOnMissing = false;
-
-    /**
-     * @type {RegisteryDelegate}
-     */
-    this.delegate = null;
   }
 
   /**
@@ -101,7 +106,8 @@ export default class Registry {
     ).then( factories => {
       var recipes = {};
       for ( let i = 0; i < names.length; i++ ) {
-        recipes = this._recipeFromFactory( name, factories[ i ] );
+        let name = names[ i ];
+        recipes[ name ] = this._recipeFromFactory( name, factories[ i ] );
       }
       return recipes;
     });
@@ -122,7 +128,7 @@ export default class Registry {
         history.push( name );
       }
       let result = this.redirects.reduce(
-        ( acc, handler ) => acc || handler( name, target ),
+        ( acc, handler ) => acc || handler.redirect( name, target ),
         null
       );
       if ( !result ) {
@@ -155,14 +161,11 @@ export default class Registry {
    * @returns {Factory}
    */
   _locateFactory( name, target ) {
-    if ( this._isLazy( name ) ) {
-      return this._factoryForLazy( name, target );
-    }
     if ( this.factories[ name ] ) {
       return this.factories[ name ];
     }
     var factory = this.resolvers.reduce( ( factory, handler ) => {
-      return factory || handler( name, target );
+      return factory || handler.resolve( name, target );
     }, null );
     if ( !factory ) {
       if ( this.nullOnMissing ) {
@@ -182,16 +185,13 @@ export default class Registry {
    * @returns {Promise.<Factory>}
    */
   _locateFactoryAsync( name, target ) {
-    if ( this._isLazy( name ) ) {
-      return Promise.resolve( this._factoryForLazy( name, target ) );
-    }
     var resolvers = this.asyncResolvers.slice();
     return Promise.resolve().then( () => {
       return (
         function next() {
           var resolver = resolvers.shift();
           if ( resolver ) {
-            return resolver( name, target ).then( factory => {
+            return resolver.resolveAsync( name, target ).then( factory => {
               return factory || next();
             });
           }
@@ -204,33 +204,5 @@ export default class Registry {
       }
       return this._locateFactory( name, target );
     });
-  }
-
-  /**
-   * @param {String} name
-   * @returns {Boolean}
-   */
-  _isLazy( name ) {
-    return /\.\.\.$/.test( name );
-  }
-
-  /**
-   * @param {String} name
-   * @returns {Factory}
-   */
-  _factoryForLazy( name, target ) {
-    name = name.substr( 0, name.length - 3 );
-    return () => {
-      // Only resolve things once the promise is awaited on.
-      var promise = Promise.resolve();
-      promise.then = ( ...args ) => {
-        var promise = Promise.resolve()
-          .then( () => this.recipeForNameAsync( name, target ) )
-          .then( recipe => this.delegate.factoryFromRecipeAsync( recipe ) )
-          .then( factory => factory() );
-        return promise.then.apply( promise, args );
-      };
-      return promise;
-    };
   }
 };

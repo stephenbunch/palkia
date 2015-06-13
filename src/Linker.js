@@ -44,10 +44,11 @@ export default class Linker {
    */
   factoryFromRecipeAsync( recipe ) {
     return Promise.resolve().then( () => {
+      var self = this;
       var component = new Component( recipe );
       return (
         function resolve( component ) {
-          return this.delegate.recipesByNameAsync(
+          return self.delegate.recipesByNameAsync(
             component.recipe.ingredients.filter( x => typeof x === 'string' ),
             component.recipe.name
           ).then( recipes => {
@@ -55,9 +56,9 @@ export default class Linker {
               component.recipe.ingredients.map( ( ingredient, index ) => {
                 var recipe =
                   typeof ingredient === 'string' ?
-                  recipies[ ingredient ] :
+                  recipes[ ingredient ] :
                   recipeFromFactory( ingredient );
-                return this._makeChildComponent( component, recipe, index );
+                return self._makeChildComponent( component, recipe, index );
               }).map( resolve )
             );
           });

@@ -69,6 +69,18 @@ describe( 'Kernel', function() {
       });
       expect( kernel.resolve( 'foo' ) ).to.equal( kernel.resolve( 'foo' ) );
     });
+
+    it( 'should not defer dependency resolution', function() {
+      var kernel = new Kernel();
+      kernel.registerFactoryAsSingleton( 'foo', [ 'bar', bar => {
+        return {};
+      }]);
+      var handler = sinon.stub().returns( () => 2 );
+      kernel.delegate( 'bar', handler );
+      var factory = kernel.factoryFor( 'foo' );
+      expect( handler ).to.have.been.called;
+      expect( factory() ).to.equal( factory() );
+    });
   });
 
   describe( '.unregister( name )', function() {

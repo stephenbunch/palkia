@@ -147,12 +147,13 @@ export default class Kernel {
   registerFactoryAsSingleton( name, factory ) {
     validateFactory( factory );
     var instance;
-    this.registry.factories[ name ] = () => {
+    var recipe = recipeFromFactory( factory );
+    this.registry.factories[ name ] = recipe.ingredients.concat( ( ...args ) => {
       if ( instance === undefined ) {
-        instance = this.factoryFrom( factory )();
+        instance = recipe.create.apply( undefined, args );
       }
       return instance;
-    };
+    });
   }
 
   /**

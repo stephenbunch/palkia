@@ -121,6 +121,15 @@ describe( 'Kernel', function() {
       kernel.delegateAsync( 'foo', handler );
       expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
     });
+
+    it( 'should not run if a synchronous delegate can provide', async function() {
+      var kernel = new Kernel();
+      var syncHandler = sinon.stub().returns( () => 2 );
+      var asyncHandler = sinon.stub().returns( Promise.reject( new Error( 'should not be called' ) ) );
+      kernel.delegate( 'foo', syncHandler );
+      kernel.delegateAsync( 'foo', asyncHandler );
+      expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
+    });
   });
 
   describe( '.delegateTo( pattern, kernel )', function() {

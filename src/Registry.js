@@ -151,16 +151,21 @@ export default class Registry {
   _locateFactoryAsync( name, target ) {
     var resolvers = this.asyncResolvers.slice();
     return Promise.resolve().then( () => {
-      return (
-        function next() {
-          var resolver = resolvers.shift();
-          if ( resolver ) {
-            return resolver.resolveAsync( name, target ).then( factory => {
-              return factory || next();
-            });
+      try {
+        // Search synchronous resolvers first.
+        return this._locateFactory( name, target );
+      } catch ( err ) {
+        return (
+          function next() {
+            var resolver = resolvers.shift();
+            if ( resolver ) {
+              return resolver.resolveAsync( name, target ).then( factory => {
+                return factory || next();
+              });
+            }
           }
-        }
-      ).call( this );
+        ).call( this );
+      }
     }).then( factory => {
       if ( factory ) {
         validateFactory( factory );

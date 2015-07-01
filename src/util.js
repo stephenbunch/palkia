@@ -9,7 +9,7 @@ export function matchFromPattern( pattern ) {
     return pattern;
   }
   if ( typeof pattern === 'string' ) {
-    pattern = new RegExp( pattern.replace( '.', '\\.' ).replace( '*', '.*' ) );
+    return value => value === pattern;
   }
   return value => pattern.test( value );
 };

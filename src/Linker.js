@@ -3,12 +3,6 @@ import Component from './Component';
 import { when, recipeFromFactory } from './util';
 import InvalidOperationError from './InvalidOperationError';
 
-/**
- * @typedef {Object} LinkerDelegate
- * @property {Function} recipeForName
- * @property {Function} recipesByNameAsync
- */
-
 export default class Linker {
   constructor() {
     /**

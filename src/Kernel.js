@@ -108,7 +108,7 @@ export default class Kernel {
    * @returns {Function}
    */
   factoryFor( name ) {
-    return this.factoryFrom([ name, dep => dep ])
+    return this.factoryFrom([ name, dep => dep ]);
   }
 
   /**
@@ -207,6 +207,31 @@ export default class Kernel {
         return Promise.resolve().then( () => {
           if ( match( name ) ) {
             return handler( name, target );
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * Registers another kernel to provide resolutions.
+   * @param {Pattern} pattern
+   * @param {Kernel} kernel
+   */
+  delegateTo( pattern, kernel ) {
+    var match = matchFromPattern( pattern );
+    this.registry.resolvers.push({
+      resolve( name ) {
+        if ( match( name ) ) {
+          return kernel.factoryFor( name );
+        }
+      }
+    });
+    this.registry.asyncResolvers.push({
+      resolveAsync( name ) {
+        return Promise.resolve().then( () => {
+          if ( match( name ) ) {
+            return kernel.factoryForAsync( name );
           }
         });
       }

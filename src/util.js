@@ -1,19 +1,6 @@
 import Recipe from './Recipe';
 
 /**
- * A string, regex, or matcher function to match on service names.
- * @typedef {String|RegExp|Function} Pattern
- */
-
-/**
- * A function to be invoked, or an array where the last element is a function
- * and the rest of the elements are the names of dependencies to be injected.
- * If target is a function, the $inject property may also be used. See
- * https://docs.angularjs.org/api/auto/service/$injector
- * @typedef {Array|Function} Factory
- */
-
-/**
  * @param {Pattern} pattern
  * @returns {Function}
  */

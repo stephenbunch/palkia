@@ -114,6 +114,29 @@ describe( 'Kernel', function() {
     });
   });
 
+  describe( '.delegateAsync( pattern, handler )', function() {
+    it( 'should register an asynchronous delegating handler', async function() {
+      var kernel = new Kernel();
+      var handler = sinon.stub().returns( Promise.resolve( () => 2 ) );
+      kernel.delegateAsync( 'foo', handler );
+      expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
+    });
+  });
+
+  describe( '.delegateTo( pattern, kernel )', function() {
+    it( 'should register a kernel to provide resolutions', async function() {
+      var a = new Kernel();
+      var b = new Kernel();
+      var syncHandler = sinon.stub().returns( () => 2 );
+      var asyncHandler = sinon.stub().returns( Promise.resolve( () => 3 ) );
+      b.delegate( 'foo', syncHandler );
+      b.delegateAsync( 'bar', asyncHandler );
+      a.delegateTo( '*', b );
+      expect( a.resolve( 'foo' ) ).to.equal( 2 );
+      expect( await a.resolveAsync( 'bar' ) ).to.equal( 3 );
+    });
+  });
+
   describe( '.redirect( pattern, handler )', function() {
     it( 'should register a redirect handler', function() {
       var kernel = new Kernel();

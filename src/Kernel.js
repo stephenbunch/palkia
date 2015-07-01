@@ -239,6 +239,32 @@ export default class Kernel {
   }
 
   /**
+   * Registers another kernel to provide resolutions for the specified
+   * namespace.
+   * @param {String} namespace
+   * @param {Kernel} kernel
+   */
+  delegateNamespace( namespace, kernel ) {
+    var match = matchFromPattern( new RegExp( `^${ namespace }` ) );
+    this.registry.resolvers.push({
+      resolve( name ) {
+        if ( match( name ) ) {
+          return kernel.factoryFor( name.substr( namespace.length ) );
+        }
+      }
+    });
+    this.registry.asyncResolvers.push({
+      resolveAsync( name ) {
+        return Promise.resolve().then( () => {
+          if ( match( name ) ) {
+            return kernel.factoryForAsync( name.substr( namespace.length ) );
+          }
+        });
+      }
+    });
+  }
+
+  /**
    * @param {String} [name] Optional name of the target.
    * @param {Factory} target
    * @param {Object.<String, *>} [locals]

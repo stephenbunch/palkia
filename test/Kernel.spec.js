@@ -131,9 +131,23 @@ describe( 'Kernel', function() {
       var asyncHandler = sinon.stub().returns( Promise.resolve( () => 3 ) );
       b.delegate( 'foo', syncHandler );
       b.delegateAsync( 'bar', asyncHandler );
-      a.delegateTo( '*', b );
+      a.delegateTo( /(foo|bar)/, b );
       expect( a.resolve( 'foo' ) ).to.equal( 2 );
       expect( await a.resolveAsync( 'bar' ) ).to.equal( 3 );
+    });
+  });
+
+  describe( '.delegateNamespace', function() {
+    it( 'should register a kernel to provide resolutions for the specified namespace', async function() {
+      var a = new Kernel();
+      var b = new Kernel();
+      var syncHandler = sinon.stub().returns( () => 2 );
+      var asyncHandler = sinon.stub().returns( Promise.resolve( () => 3 ) );
+      b.delegate( 'foo', syncHandler );
+      b.delegateAsync( 'bar', asyncHandler );
+      a.delegateNamespace( 'b:', b );
+      expect( a.resolve( 'b:foo' ) ).to.equal( 2 );
+      expect( await a.resolveAsync( 'b:bar' ) ).to.equal( 3 );
     });
   });
 

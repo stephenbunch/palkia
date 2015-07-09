@@ -1,9 +1,21 @@
-export { default as AmdResolver } from './AmdResolver';
-export { default as CommonJsResolver } from './CommonJsResolver';
-export { default as InvalidOperationError } from './InvalidOperationError';
-export { default as Kernel } from './Kernel';
-export { default as LazyResolver } from './LazyResolver';
-export { default as Linker } from './Linker';
-export { default as Recipe } from './Recipe';
-export { default as Registry } from './Registry';
-export { default as ServiceNotFoundError } from './ServiceNotFoundError';
+import AmdResolver from './AmdResolver';
+import CommonJsResolver from './CommonJsResolver';
+import InvalidOperationError from './InvalidOperationError';
+import Kernel from './Kernel';
+import LazyResolver from './LazyResolver';
+import Linker from './Linker';
+import Recipe from './Recipe';
+import Registry from './Registry';
+import ServiceNotFoundError from './ServiceNotFoundError';
+
+export default {
+  AmdResolver,
+  CommonJsResolver,
+  InvalidOperationError,
+  Kernel,
+  LazyResolver,
+  Linker,
+  Recipe,
+  Registry,
+  ServiceNotFoundError
+};

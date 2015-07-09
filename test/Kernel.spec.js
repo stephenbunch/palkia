@@ -179,7 +179,8 @@ describe( 'Kernel', function() {
       kernel.delegateAsync( 'bar', async function() {
         return () => 2;
       });
-      var foo = await kernel.resolveAsync( 'foo' );
+      kernel.registerFactory( 'baz', [ 'foo', foo => foo ] );
+      var foo = await kernel.resolveAsync( 'baz' );
       expect( foo ).to.equal( 2 );
     });
   });

@@ -95,7 +95,7 @@ export default class Linker {
    * @returns {Component}
    */
   _makeChildComponent( parent, recipe, position ) {
-    var child = new Component( recipe );
+    var child = this._componentFromRecipe( recipe );
     child.parent = parent;
     child.order = position;
     parent.children[ position ] = child;

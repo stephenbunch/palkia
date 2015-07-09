@@ -49,6 +49,30 @@
 
 /**
  * @typedef {Object} LinkerDelegate
- * @property {Function} recipeForName
- * @property {Function} recipesByNameAsync
+ * @property {LinkerDelegate.recipeForName} recipeForName
+ * @property {LinkerDelegate.recipesByNameAsync} recipesByNameAsync
+ * @property {LinkerDelegate.resolveName} resolveName
+ */
+
+/**
+ * @name LinkerDelegate.recipeForName
+ * @function
+ * @param {String} name
+ * @param {String} [target]
+ * @returns {Recipe}
+ */
+
+/**
+ * @name LinkerDelegate.recipesByNameAsync
+ * @function
+ * @param {Array.<String>} names
+ * @param {String} [target]
+ * @returns {Promise.<Object.<String, Recipe>>}
+ */
+
+/**
+ * @name LinkerDelegate.resolveName
+ * @function
+ * @param {String} name
+ * @returns {String}
  */

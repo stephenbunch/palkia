@@ -8,7 +8,7 @@ export default class Component {
     /**
      * @type {Recipe}
      */
-    this.recipe = recipe;
+    this.recipe = recipe.clone();
 
     /**
      * @type {Component}

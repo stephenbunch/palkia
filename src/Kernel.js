@@ -157,11 +157,12 @@ export default class Kernel {
   }
 
   /**
-   * Unregisters a service.
+   * Registers an alias.
    * @param {String} name
+   * @param {String} originalName
    */
-  unregister( name ) {
-    delete this.registry.factories[ name ];
+  registerAlias( aliasName, originalName ) {
+    this.redirect( aliasName, () => originalName );
   }
 
   /**

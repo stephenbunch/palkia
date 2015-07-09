@@ -38,33 +38,23 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String|null} target
+   * @param {String} [target]
    * @returns {Recipe}
    */
   recipeForName( name, target ) {
-    name = this._resolveName( name, target );
     return this._recipeFromFactory(
       name,
       this._locateFactory( name, target )
     );
   }
 
-  recipeForNameAsync( name, target ) {
-    name = this._resolveName( name, target );
-    return this._locateFactoryAsync( name, target ).then( factory => {
-      return this._recipeFromFactory( name, factory );
-    });
-  }
-
   /**
    * @param {Array.<String>} names
-   * @param {String|null} target
+   * @param {String} [target]
    * @returns {Promise.<Object.<String, Recipe>>}
    */
   recipesByNameAsync( names, target ) {
-    names = distinct( names ).map( name => {
-      return this._resolveName( name, target );
-    });
+    names = distinct( names );
     return when(
       names.map( name => this._locateFactoryAsync( name, target ) )
     ).then( factories => {
@@ -79,10 +69,10 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String|null} target
+   * @param {String} [target]
    * @returns {String}
    */
-  _resolveName( name, target ) {
+  resolveName( name, target ) {
     var initial = name;
     var history = [];
     while ( true ) {

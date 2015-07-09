@@ -1,21 +1,31 @@
 export default class Recipe {
-  constructor( value ) {
-    value = value || {};
+  /**
+   * @param {Object} [defaults]
+   */
+  constructor( defaults ) {
+    defaults = defaults || {};
 
     /**
      * @type {String|null}
      */
-    this.name = value.name || null;
+    this.name = defaults.name || null;
 
     /**
      * @type {Function}
      */
-    this.create = value.create;
+    this.create = defaults.create;
 
     /**
      * An ingredient can be the name of a service or a factory.
      * @type {Array.<String|Factory>}
      */
-    this.ingredients = value.ingredients || [];
+    this.ingredients = ( defaults.ingredients || [] ).slice();
+  }
+
+  /**
+   * @returns {Recipe}
+   */
+  clone() {
+    return new Recipe( this );
   }
 };

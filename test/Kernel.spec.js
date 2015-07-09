@@ -87,17 +87,6 @@ describe( 'Kernel', function() {
     });
   });
 
-  describe( '.unregister( name )', function() {
-    it( 'should unregister a service', function() {
-      var kernel = new Kernel();
-      kernel.register( 'foo', 2 );
-      kernel.unregister( 'foo' );
-      expect( function() {
-        kernel.resolve( 'foo' );
-      }).to.throw( ServiceNotFoundError );
-    });
-  });
-
   describe( '.invoke( [name], target, [locals] )', function() {
     it( 'should run the target passing in any dependencies', function() {
       var kernel = new Kernel();
@@ -180,6 +169,25 @@ describe( 'Kernel', function() {
     it( 'should register a redirect handler', function() {
       var kernel = new Kernel();
       kernel.redirect( 'foo', () => 'bar' );
+      kernel.register( 'bar', 2 );
+      expect( kernel.resolve( 'foo' ) ).to.equal( 2 );
+    });
+
+    it( 'should work with asynchronous resolutions', async function() {
+      var kernel = new Kernel();
+      kernel.redirect( 'foo', () => 'bar' );
+      kernel.delegateAsync( 'bar', async function() {
+        return () => 2;
+      });
+      var foo = await kernel.resolveAsync( 'foo' );
+      expect( foo ).to.equal( 2 );
+    });
+  });
+
+  describe( '.registerAlias( aliasName, originalName )', function() {
+    it( 'should register an alias', function() {
+      var kernel = new Kernel();
+      kernel.registerAlias( 'foo', 'bar' );
       kernel.register( 'bar', 2 );
       expect( kernel.resolve( 'foo' ) ).to.equal( 2 );
     });

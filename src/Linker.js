@@ -16,7 +16,7 @@ export default class Linker {
    * @returns {Function}
    */
   factoryFromRecipe( recipe ) {
-    var component = new Component( recipe );
+    var component = this._componentFromRecipe( recipe );
     var stack = [ component ];
     while ( stack.length > 0 ) {
       let component = stack.shift();
@@ -38,26 +38,24 @@ export default class Linker {
    */
   factoryFromRecipeAsync( recipe ) {
     return Promise.resolve().then( () => {
-      var self = this;
-      var component = new Component( recipe );
-      return (
-        function resolve( component ) {
-          return self.delegate.recipesByNameAsync(
-            component.recipe.ingredients.filter( x => typeof x === 'string' ),
-            component.recipe.name
-          ).then( recipes => {
-            return when(
-              component.recipe.ingredients.map( ( ingredient, index ) => {
-                var recipe =
-                  typeof ingredient === 'string' ?
-                  recipes[ ingredient ] :
-                  recipeFromFactory( ingredient );
-                return self._makeChildComponent( component, recipe, index );
-              }).map( resolve )
-            );
-          });
-        }
-      ).call( this, component ).then( () => {
+      var component = this._componentFromRecipe( recipe );
+      var resolve = component => {
+        return this.delegate.recipesByNameAsync(
+          component.recipe.ingredients.filter( x => typeof x === 'string' ),
+          component.recipe.name
+        ).then( recipes => {
+          return when(
+            component.recipe.ingredients.map( ( ingredient, index ) => {
+              var recipe =
+                typeof ingredient === 'string' ?
+                recipes[ ingredient ] :
+                recipeFromFactory( ingredient );
+              return this._makeChildComponent( component, recipe, index );
+            }).map( resolve )
+          );
+        });
+      };
+      return resolve( component ).then( () => {
         return this._factoryFromComponent( component );
       });
     });
@@ -118,5 +116,21 @@ export default class Linker {
       last = node;
       node = node.parent;
     }
+  }
+
+  /**
+   * @param {Recipe} recipe
+   * @returns {Component}
+   */
+  _componentFromRecipe( recipe ) {
+    var component = new Component( recipe );
+    component.recipe.ingredients = component.recipe.ingredients.map( ingredient => {
+      if ( typeof ingredient === 'string' ) {
+        return this.delegate.resolveName( ingredient, component.recipe.name )
+      } else {
+        return ingredient;
+      }
+    });
+    return component;
   }
 }

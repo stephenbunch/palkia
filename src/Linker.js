@@ -21,10 +21,17 @@ export default class Linker {
     while ( stack.length > 0 ) {
       let component = stack.shift();
       component.recipe.ingredients.forEach( ( ingredient, index ) => {
-        var recipe =
-          typeof ingredient === 'string' ?
-          this.delegate.recipeForName( ingredient, component.recipe.name ) :
-          recipeFromFactory( ingredient );
+        var recipe;
+        if ( typeof ingredient === 'string' ) {
+          recipe = this.delegate.recipeForName( ingredient, {
+            name: component.recipe.name,
+            isChildNode: !!component.parent
+          });
+        } else if ( ingredient instanceof Recipe ) {
+          recipe = ingredient;
+        } else {
+          recipe = recipeFromFactory( ingredient );
+        }
         var child = this._makeChildComponent( component, recipe, index );
         stack.push( child );
       });
@@ -42,14 +49,21 @@ export default class Linker {
       var resolve = component => {
         return this.delegate.recipesByNameAsync(
           component.recipe.ingredients.filter( x => typeof x === 'string' ),
-          component.recipe.name
+          {
+            name: component.recipe.name,
+            isChildNode: !!component.parent
+          }
         ).then( recipes => {
           return when(
             component.recipe.ingredients.map( ( ingredient, index ) => {
-              var recipe =
-                typeof ingredient === 'string' ?
-                recipes[ ingredient ] :
-                recipeFromFactory( ingredient );
+              var recipe;
+              if ( typeof ingredient === 'string' ) {
+                recipe = recipes[ ingredient ];
+              } else if ( ingredient instanceof Recipe ) {
+                recipe = ingredient;
+              } else {
+                recipe = recipeFromFactory( ingredient );
+              }
               return this._makeChildComponent( component, recipe, index );
             }).map( resolve )
           );
@@ -95,9 +109,10 @@ export default class Linker {
    * @returns {Component}
    */
   _makeChildComponent( parent, recipe, position ) {
-    var child = this._componentFromRecipe( recipe );
-    child.parent = parent;
-    child.order = position;
+    var child = this._componentFromRecipe( recipe, {
+      parent: parent,
+      order: position
+    });
     parent.children[ position ] = child;
     this._checkForCircularDependency( child );
     return child;
@@ -120,13 +135,21 @@ export default class Linker {
 
   /**
    * @param {Recipe} recipe
+   * @param {Object} [defaults]
    * @returns {Component}
    */
-  _componentFromRecipe( recipe ) {
+  _componentFromRecipe( recipe, defaults ) {
     var component = new Component( recipe );
+    if ( defaults ) {
+      component.parent = defaults.parent;
+      component.order = defaults.order;
+    }
     component.recipe.ingredients = component.recipe.ingredients.map( ingredient => {
       if ( typeof ingredient === 'string' ) {
-        return this.delegate.resolveName( ingredient, component.recipe.name )
+        return this.delegate.resolveName( ingredient, {
+          name: component.recipe.name,
+          isChildNode: !!component.parent
+        });
       } else {
         return ingredient;
       }

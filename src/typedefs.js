@@ -30,15 +30,21 @@
  * @name ResolveHandler.resolve
  * @function
  * @param {String} name
- * @param {String} [target] The name of the target being resolved for.
+ * @param {Node} [parentNode]
  * @returns {Factory|undefined}
+ */
+
+/**
+ * @typedef Node
+ * @property {String} name
+ * @property {Boolean} isChildNode
  */
 
 /**
  * @name AsyncResolveHandler.resolveAsync
  * @function
  * @param {String} name
- * @param {String} [target] The name of the target being resolved for.
+ * @param {Node} [parentNode]
  * @returns {Promise.<Factory|undefined>}
  */
 
@@ -46,7 +52,7 @@
  * @name RedirectHandler.redirect
  * @function
  * @param {String} name
- * @param {String} [target] The name of the target being resolved for.
+ * @param {Node} [parentNode]
  * @returns {String|undefined}
  */
 
@@ -61,7 +67,7 @@
  * @name LinkerDelegate.recipeForName
  * @function
  * @param {String} name
- * @param {String} [target]
+ * @param {Node} [parentNode]
  * @returns {Recipe}
  */
 
@@ -69,7 +75,7 @@
  * @name LinkerDelegate.recipesByNameAsync
  * @function
  * @param {Array.<String>} names
- * @param {String} [target]
+ * @param {Node} [parentNode]
  * @returns {Promise.<Object.<String, Recipe>>}
  */
 
@@ -77,5 +83,6 @@
  * @name LinkerDelegate.resolveName
  * @function
  * @param {String} name
+ * @param {Node} [parentNode]
  * @returns {String}
  */

@@ -39,6 +39,42 @@ describe( 'Kernel', function() {
       expect( await lazyFoo ).to.equal( await lazyFoo );
       expect( await lazyFoo ).to.not.equal( await lazyFoo2 );
     });
+
+    it( 'should maintain the parent node when using lazy resolution', async function() {
+      var kernel = new Kernel();
+      var handler = sinon.stub().returns( () => 2 );
+
+      kernel.registerFactory( 'baz', [ 'qux', qux => qux ] );
+      kernel.delegate( 'qux', handler );
+      expect( kernel.resolve( 'baz' ) ).to.equal( 2 );
+      expect( handler ).to.have.been.calledWith( 'qux', {
+        name: 'baz',
+        isChildNode: true
+      });
+
+      expect( kernel.resolve( 'qux' ) ).to.equal( 2 );
+      expect( handler ).to.have.been.calledWith( 'qux', {
+        name: null,
+        isChildNode: false
+      });
+
+      kernel.registerFactory( 'foo', [ 'bar...', bar => bar ] );
+      var lazyBar = kernel.resolve( 'foo' );
+      kernel.delegateAsync( 'bar', handler );
+
+      expect( await lazyBar ).to.equal( 2 );
+      expect( handler ).to.have.been.calledWith( 'bar', {
+        name: 'foo',
+        isChildNode: true
+      });
+
+      lazyBar = kernel.resolve( 'bar...' );
+      expect( await lazyBar ).to.equal( 2 );
+      expect( handler ).to.have.been.calledWith( 'bar', {
+        name: null,
+        isChildNode: false
+      });
+    });
   });
 
   describe( '.registerFactory( name, factory )', function() {
@@ -115,7 +151,10 @@ describe( 'Kernel', function() {
       var handler = sinon.stub().returns( () => 2 );
       kernel.delegate( 'foo', handler );
       expect( kernel.invoke( 'thing', [ 'foo', foo => foo ] ) ).to.equal( 2 );
-      expect( handler ).to.have.been.calledWith( 'foo', 'thing' );
+      expect( handler ).to.have.been.calledWith( 'foo', {
+        name: 'thing',
+        isChildNode: false
+      });
     });
   });
 
@@ -182,6 +221,28 @@ describe( 'Kernel', function() {
       kernel.registerFactory( 'baz', [ 'foo', foo => foo ] );
       var foo = await kernel.resolveAsync( 'baz' );
       expect( foo ).to.equal( 2 );
+    });
+
+    it( 'should pass information about the parent node', function() {
+      var kernel = new Kernel();
+      kernel.redirect( 'foo', ( name, parentNode ) => {
+        if ( parentNode.isChildNode ) {
+          return '_foo';
+        }
+      });
+      kernel.register( '_foo', 2 );
+      expect( () => {
+        kernel.resolve( 'foo' );
+      }).to.throw( ServiceNotFoundError );
+      kernel.registerFactory( 'bar', [ 'foo', foo => foo ] );
+      expect( kernel.resolve( 'bar' ) ).to.equal( 2 );
+      expect( () => {
+        kernel.invoke([ 'foo', foo => foo ]);
+      }).to.throw( ServiceNotFoundError );
+      expect( kernel.invokeChild( 'test', [ 'foo', foo => foo ] ) ).to.equal( 2 );
+      expect( () => {
+        kernel.invoke( 'test', [ 'foo', foo => foo ] );
+      }).to.throw( ServiceNotFoundError );
     });
   });
 

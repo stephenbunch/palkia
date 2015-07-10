@@ -38,25 +38,25 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String} [target]
+   * @param {Node} [parentNode]
    * @returns {Recipe}
    */
-  recipeForName( name, target ) {
+  recipeForName( name, parentNode ) {
     return this._recipeFromFactory(
       name,
-      this._locateFactory( name, target )
+      this._locateFactory( name, parentNode )
     );
   }
 
   /**
    * @param {Array.<String>} names
-   * @param {String} [target]
+   * @param {Node} [parentNode]
    * @returns {Promise.<Object.<String, Recipe>>}
    */
-  recipesByNameAsync( names, target ) {
+  recipesByNameAsync( names, parentNode ) {
     names = distinct( names );
     return when(
-      names.map( name => this._locateFactoryAsync( name, target ) )
+      names.map( name => this._locateFactoryAsync( name, parentNode ) )
     ).then( factories => {
       var recipes = {};
       for ( let i = 0; i < names.length; i++ ) {
@@ -69,10 +69,10 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String} [target]
+   * @param {Node} [parentNode]
    * @returns {String}
    */
-  resolveName( name, target ) {
+  resolveName( name, parentNode ) {
     var initial = name;
     var history = [];
     while ( true ) {
@@ -82,7 +82,7 @@ export default class Registry {
         history.push( name );
       }
       let result = this.redirects.reduce(
-        ( acc, handler ) => acc || handler.redirect( name, target ),
+        ( acc, handler ) => acc || handler.redirect( name, parentNode ),
         null
       );
       if ( !result ) {
@@ -111,21 +111,24 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String|null} target
+   * @param {Node} [parentNode]
    * @returns {Factory}
    */
-  _locateFactory( name, target ) {
+  _locateFactory( name, parentNode ) {
     if ( this.factories[ name ] ) {
       return this.factories[ name ];
     }
     var factory = this.resolvers.reduce( ( factory, handler ) => {
-      return factory || handler.resolve( name, target );
+      return factory || handler.resolve( name, parentNode );
     }, null );
     if ( !factory ) {
       if ( this.nullOnMissing ) {
         factory = () => null;
       } else {
-        throw new ServiceNotFoundError( `Could not locate service '${ name }' for '${ target || '' }'` );
+        throw new ServiceNotFoundError(
+          `Could not locate service '${ name }' for ` +
+          `'${ parentNode && parentNode.name || '' }'`
+        );
       }
     } else {
       validateFactory( factory );
@@ -135,21 +138,21 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {String|null} target
+   * @param {Node} parentNode
    * @returns {Promise.<Factory>}
    */
-  _locateFactoryAsync( name, target ) {
+  _locateFactoryAsync( name, parentNode ) {
     var resolvers = this.asyncResolvers.slice();
     return Promise.resolve().then( () => {
       try {
         // Search synchronous resolvers first.
-        return this._locateFactory( name, target );
+        return this._locateFactory( name, parentNode );
       } catch ( err ) {
         return (
           function next() {
             var resolver = resolvers.shift();
             if ( resolver ) {
-              return resolver.resolveAsync( name, target ).then( factory => {
+              return resolver.resolveAsync( name, parentNode ).then( factory => {
                 return factory || next();
               });
             }
@@ -161,7 +164,7 @@ export default class Registry {
         validateFactory( factory );
         return factory;
       }
-      return this._locateFactory( name, target );
+      return this._locateFactory( name, parentNode );
     });
   }
 };

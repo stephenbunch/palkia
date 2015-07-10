@@ -4,6 +4,7 @@ import Linker from './Linker';
 import AmdResolver from './AmdResolver';
 import CommonJsResolver from './CommonJsResolver';
 import LazyResolver from './LazyResolver';
+import Recipe from './Recipe';
 
 export default class Kernel {
   constructor() {
@@ -69,13 +70,46 @@ export default class Kernel {
   }
 
   /**
+   * Invokes the target as child node.
    * @param {String} [name] Optional name of the target.
    * @param {Factory} target
    * @param {Object.<String, *>} [locals]
-   * @returns {Promise}
+   * @returns {*}
+   */
+  invokeChild( name, target, locals ) {
+    var recipe = this._recipeFromArgs( name, target, locals );
+    recipe = new Recipe({
+      create: x => x,
+      ingredients: [ recipe ]
+    });
+    return this.linker.factoryFromRecipe( recipe )();
+  }
+
+  /**
+   * @param {String} [name] Optional name of the target.
+   * @param {Factory} target
+   * @param {Object.<String, *>} [locals]
+   * @returns {Promise.<*>}
    */
   invokeAsync( name, target, locals ) {
     return this.factoryFromAsync( name, target, locals )
+      .then( factory => factory() );
+  }
+
+  /**
+   * Invokes the target as a child node asynchronously.
+   * @param {String} [name] Optional name of the target.
+   * @param {Factory} target
+   * @param {Object.<String, *>} [locals]
+   * @returns {Promise.<*>}
+   */
+  invokeChildAsync( name, target, locals ) {
+    var recipe = this._recipeFromArgs( name, target, locals );
+    recipe = new Recipe({
+      create: x => x,
+      ingredients: [ recipe ]
+    });
+    return this.linker.factoryFromRecipeAsync( recipe )
       .then( factory => factory() );
   }
 
@@ -267,7 +301,7 @@ export default class Kernel {
   }
 
   /**
-   * @param {String} [name] Optional name of the target.
+   * @param {String} [name] Optional name of the parent node.
    * @param {Factory} target
    * @param {Object.<String, *>} [locals]
    *   If present, dependencies are read from this object first before the
@@ -282,7 +316,7 @@ export default class Kernel {
     }
     locals = locals || {};
     var recipe = recipeFromFactory( target );
-    recipe.name = name || null;
+    recipe.name = name || recipe.name;
     recipe.ingredients = recipe.ingredients.map( x => {
       if ( locals[ x ] ) {
         return () => locals[ x ]

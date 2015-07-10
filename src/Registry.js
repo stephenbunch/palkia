@@ -125,10 +125,11 @@ export default class Registry {
       if ( this.nullOnMissing ) {
         factory = () => null;
       } else {
-        throw new ServiceNotFoundError(
-          `Could not locate service '${ name }' for ` +
-          `'${ parentNode && parentNode.name || '' }'`
-        );
+        let message = `Could not locate service '${ name }'`;
+        if ( parentNode && parentNode.name ) {
+          message += ` for '${ parentNode.name }'`;
+        }
+        throw new ServiceNotFoundError( message );
       }
     } else {
       validateFactory( factory );

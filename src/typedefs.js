@@ -13,35 +13,38 @@
 
 /**
  * @typedef ResolveHandler
- * @property {ResolveFunction} resolve
+ * @property {ResolveHandler.resolve} resolve
  */
 
 /**
  * @typedef AsyncResolveHandler
- * @property {AsyncResolveFunction} resolveAsync
+ * @property {AsyncResolveHandler.resolveAsync} resolveAsync
  */
 
 /**
  * @typedef RedirectHandler
- * @property {RedirectFunction} redirect
+ * @property {RedirectHandler.redirect} redirect
  */
 
 /**
- * @callback ResolveFunction
+ * @name ResolveHandler.resolve
+ * @function
  * @param {String} name
  * @param {String} [target] The name of the target being resolved for.
  * @returns {Factory|undefined}
  */
 
 /**
- * @callback AsyncResolveFunction
+ * @name AsyncResolveHandler.resolveAsync
+ * @function
  * @param {String} name
  * @param {String} [target] The name of the target being resolved for.
  * @returns {Promise.<Factory|undefined>}
  */
 
 /**
- * @callback RedirectFunction
+ * @name RedirectHandler.redirect
+ * @function
  * @param {String} name
  * @param {String} [target] The name of the target being resolved for.
  * @returns {String|undefined}

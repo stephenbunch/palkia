@@ -112,13 +112,8 @@ export default class Kernel {
    * @param {Object.<String, *>} [locals]
    * @returns {*}
    */
-  invokeAsChild( name, target, locals ) {
-    var recipe = this._recipeFromArgs( name, target, locals );
-    recipe = new Recipe({
-      create: x => x,
-      ingredients: [ recipe ]
-    });
-    return this._linker.factoryFromRecipe( recipe )();
+  invokeChild( name, target, locals ) {
+    return this.factoryFromChild( name, target, locals )();
   }
 
   /**
@@ -139,13 +134,8 @@ export default class Kernel {
    * @param {Object.<String, *>} [locals]
    * @returns {Promise.<*>}
    */
-  invokeAsChildAsync( name, target, locals ) {
-    var recipe = this._recipeFromArgs( name, target, locals );
-    recipe = new Recipe({
-      create: x => x,
-      ingredients: [ recipe ]
-    });
-    return this._linker.factoryFromRecipeAsync( recipe )
+  invokeChildAsync( name, target, locals ) {
+    return this.factoryFromChildAsync( name, target, locals )
       .then( factory => factory() );
   }
 
@@ -170,6 +160,18 @@ export default class Kernel {
   factoryFromAsync( name, target, locals ) {
     return this._linker.factoryFromRecipeAsync(
       this._recipeFromArgs( name, target, locals )
+    );
+  }
+
+  factoryFromChild( name, target, locals ) {
+    return this._linker.factoryFromRecipe(
+      this._childRecipeFromArgs( name, target, locals )
+    );
+  }
+
+  factoryFromChildAsync( name, target, locals ) {
+    return this._linker.factoryFromRecipeAsync(
+      this._childRecipeFromArgs( name, target, locals )
     );
   }
 
@@ -243,9 +245,9 @@ export default class Kernel {
   redirect( pattern, handler ) {
     var match = matchFromPattern( pattern );
     this._registry.redirects.push({
-      redirect( name, target ) {
+      redirect( name, namedNode ) {
         if ( match( name ) ) {
-          return handler( name, target );
+          return handler( name, namedNode );
         }
       }
     });
@@ -259,9 +261,9 @@ export default class Kernel {
   delegate( pattern, handler ) {
     var match = matchFromPattern( pattern );
     this._registry.resolvers.push({
-      resolve( name, target ) {
+      resolve( name, namedNode ) {
         if ( match( name ) ) {
-          return handler( name, target );
+          return handler( name, namedNode );
         }
       }
     });
@@ -275,10 +277,10 @@ export default class Kernel {
   delegateAsync( pattern, handler ) {
     var match = matchFromPattern( pattern );
     this._registry.asyncResolvers.push({
-      resolveAsync( name, target ) {
+      resolveAsync( name, namedNode ) {
         return Promise.resolve().then( () => {
           if ( match( name ) ) {
-            return handler( name, target );
+            return handler( name, namedNode );
           }
         });
       }
@@ -367,5 +369,14 @@ export default class Kernel {
       return x;
     });
     return recipe;
+  }
+
+  _childRecipeFromArgs( name, target, locals ) {
+    return new Recipe({
+      create: x => x,
+      ingredients: [
+        this._recipeFromArgs( name, target, locals )
+      ]
+    });
   }
 };

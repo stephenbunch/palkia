@@ -24,7 +24,7 @@ export default class LazyResolver {
               promise2 = Promise.resolve().then( () => {
                 var target = [ name, dep => dep ];
                 if ( namedNode && namedNode.isChildNode ) {
-                  return this.kernel.invokeAsChildAsync( namedNode.name, target );
+                  return this.kernel.invokeChildAsync( namedNode.name, target );
                 } else {
                   return this.kernel.invokeAsync( target );
                 }

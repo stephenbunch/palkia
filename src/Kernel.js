@@ -336,6 +336,14 @@ export default class Kernel {
   }
 
   /**
+   * @param {String} name
+   * @returns {Target|undefined}
+   */
+  targetFromName( name ) {
+    return this._registry.targets[ name ];
+  }
+
+  /**
    * @param {String} [name] Optional name of the parent node.
    * @param {Target} target
    * @param {Object.<String, *>} [locals]

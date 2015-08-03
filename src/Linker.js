@@ -1,6 +1,6 @@
 import Recipe from './Recipe';
 import Component from './Component';
-import { when, recipeFromFactory } from './util';
+import { when, recipeFromTarget } from './util';
 import InvalidOperationError from './InvalidOperationError';
 
 export default class Linker {
@@ -30,7 +30,7 @@ export default class Linker {
         } else if ( ingredient instanceof Recipe ) {
           recipe = ingredient;
         } else {
-          recipe = recipeFromFactory( ingredient );
+          recipe = recipeFromTarget( ingredient );
         }
         var child = this._makeChildComponent( component, recipe, index );
         stack.push( child );
@@ -62,7 +62,7 @@ export default class Linker {
               } else if ( ingredient instanceof Recipe ) {
                 recipe = ingredient;
               } else {
-                recipe = recipeFromFactory( ingredient );
+                recipe = recipeFromTarget( ingredient );
               }
               return this._makeChildComponent( component, recipe, index );
             }).map( resolve )

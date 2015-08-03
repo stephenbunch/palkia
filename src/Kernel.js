@@ -1,4 +1,4 @@
-import { matchFromPattern, recipeFromFactory, validateFactory } from './util';
+import { matchFromPattern, recipeFromTarget, validateTarget } from './util';
 import Registry from './Registry';
 import Linker from './Linker';
 import AmdResolver from './AmdResolver';
@@ -8,37 +8,52 @@ import Recipe from './Recipe';
 
 export default class Kernel {
   constructor() {
-    this.registry = new Registry();
-    this.linker = new Linker();
-    this.linker.delegate = this.registry;
-    this.registry.resolvers.push( new LazyResolver( this ) );
+    this._registry = new Registry();
+    this._linker = new Linker();
+    this._linker.delegate = this._registry;
+    this._registry.resolvers.push( new LazyResolver( this ) );
   }
 
   /**
-   * @param {Object} [options]
-   * @returns {Kernel}
+   * @returns {Array.<ResolveHandler>}
    */
-  useModules( options ) {
-    options = options || {};
-    if ( typeof define === 'function' && define.amd ) {
-      this.registry.asyncResolvers.push(
-        new AmdResolver( options.requireContext || global.requirejs )
-      );
-    } else if ( typeof exports === 'object' ) {
-      this.registry.resolvers.push(
-        new CommonJsResolver( options.baseDir )
-      );
-    }
-    return this;
+  get resolvers() {
+    return this._registry.resolvers;
   }
 
   /**
-   * @param {Boolean} [enable]
-   * @returns {Kernel}
+   * @param {Array.<ResolveHandler>} value
    */
-  returnNullOnMissing( enable = true ) {
-    this.registry.nullOnMissing = enable;
-    return this;
+  set resolvers( value ) {
+    this._registry.resolvers = value;
+  }
+
+  /**
+   * @returns {Array.<AsyncResolveHandler}
+   */
+  get asyncResolvers() {
+    return this._registry.asyncResolvers;
+  }
+
+  /**
+   * @param {Array.<AsyncResolveHandler} value
+   */
+  set asyncResolvers( value ) {
+    this._registry.asyncResolvers = value;
+  }
+
+  /**
+   * @returns {Array.<RedirectHandler}
+   */
+  get redirects() {
+    return this._registry.redirects;
+  }
+
+  /**
+   * @param {Array.<RedirectHandler} value
+   */
+  set redirects( value ) {
+    this._registry.redirects = value;
   }
 
   /**
@@ -60,8 +75,15 @@ export default class Kernel {
   }
 
   /**
+   * Invokes a target, optionally specifying the name of the target.
+   *
+   * Targets can be named or unnamed. Targets can reference other targets by
+   * name, registered or unregistered, and they can also contain inline targets.
+   * When a target's dependency targets are resolved, its name is made available
+   * to the dependency resolvers.
+   *
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {*}
    */
@@ -70,9 +92,23 @@ export default class Kernel {
   }
 
   /**
-   * Invokes the target as child node.
+   * Invokes the target as a child node.
+   *
+   * What is a child node? Let's say we have a target 'A' which has a dependency
+   * 'B' which has its own dependency 'C'. The object graph would look like
+   * this: A > B > C. In this case, A is the top level node while and B and C
+   * are both child nodes. Defining this distinction between top level and child
+   * allows us to write different rules for resolving each. For example, we
+   * might want the ability to have private modules. With this distinction, we
+   * can easily write a rule that says, "If module X is a top level node, hide
+   * all resolutions whose names begin with an underscore (_)."
+   *
+   * Invoking a target as a child allows us to invoke B without having any
+   * knowledge of A. In other words, it allows us to resolve a target as if it
+   * were a child node rather than a top level node.
+   *
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {*}
    */
@@ -82,12 +118,12 @@ export default class Kernel {
       create: x => x,
       ingredients: [ recipe ]
     });
-    return this.linker.factoryFromRecipe( recipe )();
+    return this._linker.factoryFromRecipe( recipe )();
   }
 
   /**
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {Promise.<*>}
    */
@@ -99,7 +135,7 @@ export default class Kernel {
   /**
    * Invokes the target as a child node asynchronously.
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {Promise.<*>}
    */
@@ -109,30 +145,30 @@ export default class Kernel {
       create: x => x,
       ingredients: [ recipe ]
     });
-    return this.linker.factoryFromRecipeAsync( recipe )
+    return this._linker.factoryFromRecipeAsync( recipe )
       .then( factory => factory() );
   }
 
   /**
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {Function}
    */
   factoryFrom( name, target, locals ) {
-    return this.linker.factoryFromRecipe(
+    return this._linker.factoryFromRecipe(
       this._recipeFromArgs( name, target, locals )
     );
   }
 
   /**
    * @param {String} [name] Optional name of the target.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    * @returns {Promise.<Function>}
    */
   factoryFromAsync( name, target, locals ) {
-    return this.linker.factoryFromRecipeAsync(
+    return this._linker.factoryFromRecipeAsync(
       this._recipeFromArgs( name, target, locals )
     );
   }
@@ -165,24 +201,24 @@ export default class Kernel {
   /**
    * Registers a factory with the kernel.
    * @param {String} name
-   * @param {Factory} factory
+   * @param {Target} factory
    */
   registerFactory( name, factory ) {
-    validateFactory( factory );
-    this.registry.factories[ name ] = factory;
+    validateTarget( factory );
+    this._registry.targets[ name ] = factory;
   }
 
   /**
    * Registers a factory with the kernel who's value will be cached for all
    * future requests.
    * @param {String} name
-   * @param {Factory} factory
+   * @param {Target} target
    */
   registerFactoryAsSingleton( name, factory ) {
-    validateFactory( factory );
+    validateTarget( factory );
     var instance;
-    var recipe = recipeFromFactory( factory );
-    this.registry.factories[ name ] = recipe.ingredients.concat( ( ...args ) => {
+    var recipe = recipeFromTarget( factory );
+    this._registry.targets[ name ] = recipe.ingredients.concat( ( ...args ) => {
       if ( instance === undefined ) {
         instance = recipe.create.apply( undefined, args );
       }
@@ -206,7 +242,7 @@ export default class Kernel {
    */
   redirect( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this.registry.redirects.push({
+    this._registry.redirects.push({
       redirect( name, target ) {
         if ( match( name ) ) {
           return handler( name, target );
@@ -222,7 +258,7 @@ export default class Kernel {
    */
   delegate( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this.registry.resolvers.push({
+    this._registry.resolvers.push({
       resolve( name, target ) {
         if ( match( name ) ) {
           return handler( name, target );
@@ -238,7 +274,7 @@ export default class Kernel {
    */
   delegateAsync( pattern, handler ) {
     var match = matchFromPattern( pattern );
-    this.registry.asyncResolvers.push({
+    this._registry.asyncResolvers.push({
       resolveAsync( name, target ) {
         return Promise.resolve().then( () => {
           if ( match( name ) ) {
@@ -256,14 +292,14 @@ export default class Kernel {
    */
   delegateTo( pattern, kernel ) {
     var match = matchFromPattern( pattern );
-    this.registry.resolvers.push({
+    this._registry.resolvers.push({
       resolve( name ) {
         if ( match( name ) ) {
           return kernel.factoryFor( name );
         }
       }
     });
-    this.registry.asyncResolvers.push({
+    this._registry.asyncResolvers.push({
       resolveAsync( name ) {
         return Promise.resolve().then( () => {
           if ( match( name ) ) {
@@ -281,18 +317,17 @@ export default class Kernel {
    * @param {Kernel} kernel
    */
   delegateNamespace( namespace, kernel ) {
-    var match = matchFromPattern( new RegExp( `^${ namespace }` ) );
-    this.registry.resolvers.push({
+    this._registry.resolvers.push({
       resolve( name ) {
-        if ( match( name ) ) {
+        if ( name.startsWith( namespace ) ) {
           return kernel.factoryFor( name.substr( namespace.length ) );
         }
       }
     });
-    this.registry.asyncResolvers.push({
+    this._registry.asyncResolvers.push({
       resolveAsync( name ) {
         return Promise.resolve().then( () => {
-          if ( match( name ) ) {
+          if ( name.startsWith( namespace ) ) {
             return kernel.factoryForAsync( name.substr( namespace.length ) );
           }
         });
@@ -302,7 +337,7 @@ export default class Kernel {
 
   /**
    * @param {String} [name] Optional name of the parent node.
-   * @param {Factory} target
+   * @param {Target} target
    * @param {Object.<String, *>} [locals]
    *   If present, dependencies are read from this object first before the
    *   kernel is consulted.
@@ -315,7 +350,7 @@ export default class Kernel {
       name = null;
     }
     locals = locals || {};
-    var recipe = recipeFromFactory( target );
+    var recipe = recipeFromTarget( target );
     recipe.name = name || recipe.name;
     recipe.ingredients = recipe.ingredients.map( x => {
       if ( locals[ x ] ) {

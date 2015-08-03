@@ -8,7 +8,7 @@
  * and the rest of the elements are the names of dependencies to be injected.
  * If target is a function, the $inject property may also be used. See
  * https://docs.angularjs.org/api/auto/service/$injector
- * @typedef {Array|Function} Factory
+ * @typedef {Array.<String|Target|Function>|Function} Target
  */
 
 /**
@@ -30,12 +30,12 @@
  * @name ResolveHandler.resolve
  * @function
  * @param {String} name
- * @param {Node} [parentNode]
- * @returns {Factory|undefined}
+ * @param {NamedNode} [namedNode]
+ * @returns {Target|undefined}
  */
 
 /**
- * @typedef Node
+ * @typedef NamedNode
  * @property {String} name
  * @property {Boolean} isChildNode
  */
@@ -44,15 +44,15 @@
  * @name AsyncResolveHandler.resolveAsync
  * @function
  * @param {String} name
- * @param {Node} [parentNode]
- * @returns {Promise.<Factory|undefined>}
+ * @param {NamedNode} [namedNode]
+ * @returns {Promise.<Target|undefined>}
  */
 
 /**
  * @name RedirectHandler.redirect
  * @function
  * @param {String} name
- * @param {Node} [parentNode]
+ * @param {NamedNode} [namedNode]
  * @returns {String|undefined}
  */
 
@@ -67,7 +67,7 @@
  * @name LinkerDelegate.recipeForName
  * @function
  * @param {String} name
- * @param {Node} [parentNode]
+ * @param {NamedNode} [namedNode]
  * @returns {Recipe}
  */
 
@@ -75,7 +75,7 @@
  * @name LinkerDelegate.recipesByNameAsync
  * @function
  * @param {Array.<String>} names
- * @param {Node} [parentNode]
+ * @param {NamedNode} [namedNode]
  * @returns {Promise.<Object.<String, Recipe>>}
  */
 
@@ -83,6 +83,6 @@
  * @name LinkerDelegate.resolveName
  * @function
  * @param {String} name
- * @param {Node} [parentNode]
+ * @param {NamedNode} [namedNode]
  * @returns {String}
  */

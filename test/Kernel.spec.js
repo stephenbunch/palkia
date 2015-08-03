@@ -223,10 +223,10 @@ describe( 'Kernel', function() {
       expect( foo ).to.equal( 2 );
     });
 
-    it( 'should pass information about the parent node', function() {
+    it( 'should pass information about the named node', function() {
       var kernel = new Kernel();
-      kernel.redirect( 'foo', ( name, parentNode ) => {
-        if ( parentNode.isChildNode ) {
+      kernel.redirect( 'foo', ( name, namedNode ) => {
+        if ( namedNode.isChildNode ) {
           return '_foo';
         }
       });

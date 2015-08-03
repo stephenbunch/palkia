@@ -1,9 +1,9 @@
 import Recipe from './Recipe';
 import {
-  recipeFromFactory,
+  recipeFromTarget,
   when,
   distinct,
-  validateFactory
+  validateTarget
 } from './util';
 import ServiceNotFoundError from './ServiceNotFoundError';
 import InvalidOperationError from './InvalidOperationError';
@@ -11,9 +11,9 @@ import InvalidOperationError from './InvalidOperationError';
 export default class Registry {
   constructor() {
     /**
-     * @type {Object.<String, Factory>}
+     * @type {Object.<String, Target>}
      */
-    this.factories = {};
+    this.targets = {};
 
     /**
      * @type {Array.<ResolveHandler>}
@@ -29,39 +29,34 @@ export default class Registry {
      * @type {Array.<AsyncResolveHandler}
      */
     this.asyncResolvers = [];
-
-    /**
-     * @type {Boolean}
-     */
-    this.nullOnMissing = false;
   }
 
   /**
    * @param {String} name
-   * @param {Node} [parentNode]
+   * @param {NamedNode} [namedNode]
    * @returns {Recipe}
    */
-  recipeForName( name, parentNode ) {
-    return this._recipeFromFactory(
+  recipeForName( name, namedNode ) {
+    return this._recipeFromTarget(
       name,
-      this._locateFactory( name, parentNode )
+      this._locateTarget( name, namedNode )
     );
   }
 
   /**
    * @param {Array.<String>} names
-   * @param {Node} [parentNode]
+   * @param {NamedNode} [namedNode]
    * @returns {Promise.<Object.<String, Recipe>>}
    */
-  recipesByNameAsync( names, parentNode ) {
+  recipesByNameAsync( names, namedNode ) {
     names = distinct( names );
     return when(
-      names.map( name => this._locateFactoryAsync( name, parentNode ) )
-    ).then( factories => {
+      names.map( name => this._locateTargetAsync( name, namedNode ) )
+    ).then( targets => {
       var recipes = {};
       for ( let i = 0; i < names.length; i++ ) {
         let name = names[ i ];
-        recipes[ name ] = this._recipeFromFactory( name, factories[ i ] );
+        recipes[ name ] = this._recipeFromTarget( name, targets[ i ] );
       }
       return recipes;
     });
@@ -69,10 +64,10 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {Node} [parentNode]
+   * @param {NamedNode} [namedNode]
    * @returns {String}
    */
-  resolveName( name, parentNode ) {
+  resolveName( name, namedNode ) {
     var initial = name;
     var history = [];
     while ( true ) {
@@ -82,7 +77,7 @@ export default class Registry {
         history.push( name );
       }
       let result = this.redirects.reduce(
-        ( acc, handler ) => acc || handler.redirect( name, parentNode ),
+        ( acc, handler ) => acc || handler.redirect( name, namedNode ),
         null
       );
       if ( !result ) {
@@ -95,13 +90,13 @@ export default class Registry {
 
   /**
    * Returns a new recipe by combining the first recipe with the details from
-   * the factory.
+   * the target.
    * @param {String} name
-   * @param {Factory} factory
+   * @param {Target} target
    * @returns {Recipe}
    */
-  _recipeFromFactory( name, factory ) {
-    var { ingredients, create } = recipeFromFactory( factory );
+  _recipeFromTarget( name, target ) {
+    var { ingredients, create } = recipeFromTarget( target );
     return new Recipe({
       name: name,
       create: create,
@@ -111,61 +106,57 @@ export default class Registry {
 
   /**
    * @param {String} name
-   * @param {Node} [parentNode]
-   * @returns {Factory}
+   * @param {NamedNode} [namedNode]
+   * @returns {Target}
    */
-  _locateFactory( name, parentNode ) {
-    if ( this.factories[ name ] ) {
-      return this.factories[ name ];
+  _locateTarget( name, namedNode ) {
+    if ( this.targets[ name ] ) {
+      return this.targets[ name ];
     }
-    var factory = this.resolvers.reduce( ( factory, handler ) => {
-      return factory || handler.resolve( name, parentNode );
+    var target = this.resolvers.reduce( ( target, handler ) => {
+      return target || handler.resolve( name, namedNode );
     }, null );
-    if ( !factory ) {
-      if ( this.nullOnMissing ) {
-        factory = () => null;
-      } else {
-        let message = `Could not locate service '${ name }'`;
-        if ( parentNode && parentNode.name ) {
-          message += ` for '${ parentNode.name }'`;
-        }
-        throw new ServiceNotFoundError( message );
+    if ( !target ) {
+      let message = `Could not locate service '${ name }'`;
+      if ( namedNode && namedNode.name ) {
+        message += ` for '${ namedNode.name }'`;
       }
+      throw new ServiceNotFoundError( message );
     } else {
-      validateFactory( factory );
+      validateTarget( target );
     }
-    return factory;
+    return target;
   }
 
   /**
    * @param {String} name
-   * @param {Node} parentNode
-   * @returns {Promise.<Factory>}
+   * @param {NamedNode} [namedNode]
+   * @returns {Promise.<Target>}
    */
-  _locateFactoryAsync( name, parentNode ) {
+  _locateTargetAsync( name, namedNode ) {
     var resolvers = this.asyncResolvers.slice();
     return Promise.resolve().then( () => {
       try {
         // Search synchronous resolvers first.
-        return this._locateFactory( name, parentNode );
+        return this._locateTarget( name, namedNode );
       } catch ( err ) {
         return (
           function next() {
             var resolver = resolvers.shift();
             if ( resolver ) {
-              return resolver.resolveAsync( name, parentNode ).then( factory => {
-                return factory || next();
+              return resolver.resolveAsync( name, namedNode ).then( target => {
+                return target || next();
               });
             }
           }
         ).call( this );
       }
-    }).then( factory => {
-      if ( factory ) {
-        validateFactory( factory );
-        return factory;
+    }).then( target => {
+      if ( target ) {
+        validateTarget( target );
+        return target;
       }
-      return this._locateFactory( name, parentNode );
+      return this._locateTarget( name, namedNode );
     });
   }
 };

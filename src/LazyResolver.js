@@ -6,9 +6,9 @@ export default class LazyResolver {
 
   /**
    * @param {String} name
-   * @param {Node} [parentNode]
+   * @param {NamedNode} [namedNode]
    */
-  resolve( name, parentNode ) {
+  resolve( name, namedNode ) {
     if ( this.pattern.test( name ) ) {
       name = name.substr( 0, name.length - 3 );
       var promise;
@@ -23,12 +23,8 @@ export default class LazyResolver {
               // the promise is awaited on.
               promise2 = Promise.resolve().then( () => {
                 var target = [ name, dep => dep ];
-                if ( parentNode && parentNode.isChildNode ) {
-                  if ( parentNode.isChildNode ) {
-                    return this.kernel.invokeChildAsync( parentNode.name, target );
-                  } else {
-                    return this.kernel.invokeAsync( parentNode.name, target );
-                  }
+                if ( namedNode && namedNode.isChildNode ) {
+                  return this.kernel.invokeChildAsync( namedNode.name, target );
                 } else {
                   return this.kernel.invokeAsync( target );
                 }

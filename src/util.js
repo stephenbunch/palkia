@@ -38,19 +38,19 @@ export function when( promises ) {
 };
 
 /**
- * @param {Factory} factory
+ * @param {Target} target
  * @returns {Recipe}
  */
-export function recipeFromFactory( factory ) {
+export function recipeFromTarget( target ) {
   var deps;
-  if ( typeof factory === 'function' ) {
-    deps = factory.$inject || [];
+  if ( typeof target === 'function' ) {
+    deps = target.$inject || [];
   } else {
-    deps = factory.slice();
-    factory = deps.pop();
+    deps = target.slice();
+    target = deps.pop();
   }
   return new Recipe({
-    create: factory,
+    create: target,
     ingredients: deps
   });
 };
@@ -69,15 +69,15 @@ export function distinct( items ) {
 };
 
 /**
- * @param {Factory} factory
+ * @param {Target} target
  */
-export function validateFactory( factory ) {
-  if ( typeof factory !== 'function' ) {
-    if ( typeOf( factory ) !== 'array' ) {
-      throw new Error( 'Expected factory to be an array or function.' );
+export function validateTarget( target ) {
+  if ( typeof target !== 'function' ) {
+    if ( typeOf( target ) !== 'array' ) {
+      throw new Error( 'Expected target to be an array or function.' );
     }
-    if ( typeof factory[ factory.length - 1 ] !== 'function' ) {
-      throw new Error( 'The last element of an array factory should be a function.' );
+    if ( typeof target[ target.length - 1 ] !== 'function' ) {
+      throw new Error( 'The last element of an array target should be a function.' );
     }
   }
 };

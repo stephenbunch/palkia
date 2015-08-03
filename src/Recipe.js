@@ -17,7 +17,7 @@ export default class Recipe {
 
     /**
      * An ingredient can be the name of a service or a factory.
-     * @type {Array.<String|Factory|Recipe>}
+     * @type {Array.<String|Target|Recipe>}
      */
     this.ingredients = ( defaults.ingredients || [] ).slice();
   }

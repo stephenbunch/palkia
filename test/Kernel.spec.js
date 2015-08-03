@@ -239,7 +239,7 @@ describe( 'Kernel', function() {
       expect( () => {
         kernel.invoke([ 'foo', foo => foo ]);
       }).to.throw( ServiceNotFoundError );
-      expect( kernel.invokeChild( 'test', [ 'foo', foo => foo ] ) ).to.equal( 2 );
+      expect( kernel.invokeAsChild( 'test', [ 'foo', foo => foo ] ) ).to.equal( 2 );
       expect( () => {
         kernel.invoke( 'test', [ 'foo', foo => foo ] );
       }).to.throw( ServiceNotFoundError );

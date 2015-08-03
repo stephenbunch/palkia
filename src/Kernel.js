@@ -112,7 +112,7 @@ export default class Kernel {
    * @param {Object.<String, *>} [locals]
    * @returns {*}
    */
-  invokeChild( name, target, locals ) {
+  invokeAsChild( name, target, locals ) {
     var recipe = this._recipeFromArgs( name, target, locals );
     recipe = new Recipe({
       create: x => x,
@@ -139,7 +139,7 @@ export default class Kernel {
    * @param {Object.<String, *>} [locals]
    * @returns {Promise.<*>}
    */
-  invokeChildAsync( name, target, locals ) {
+  invokeAsChildAsync( name, target, locals ) {
     var recipe = this._recipeFromArgs( name, target, locals );
     recipe = new Recipe({
       create: x => x,

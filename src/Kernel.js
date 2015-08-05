@@ -1,10 +1,11 @@
-import { matchFromPattern, recipeFromTarget, validateTarget } from './util';
-import Registry from './Registry';
-import Linker from './Linker';
 import AmdResolver from './AmdResolver';
 import CommonJsResolver from './CommonJsResolver';
 import LazyResolver from './LazyResolver';
+import Linker from './Linker';
+import OptionalResolver from './OptionalResolver';
 import Recipe from './Recipe';
+import Registry from './Registry';
+import { matchFromPattern, recipeFromTarget, validateTarget } from './util';
 
 export default class Kernel {
   constructor() {
@@ -12,6 +13,7 @@ export default class Kernel {
     this._linker = new Linker();
     this._linker.delegate = this._registry;
     this._registry.resolvers.push( new LazyResolver( this ) );
+    this._registry.resolvers.push( new OptionalResolver( this ) );
   }
 
   /**
@@ -54,6 +56,14 @@ export default class Kernel {
    */
   set redirects( value ) {
     this._registry.redirects = value;
+  }
+
+  /**
+   * @param {String} name
+   * @returns {Boolean}
+   */
+  isNameRegistered( name ) {
+    return !!this._registry.targets[ name ];
   }
 
   /**
@@ -198,6 +208,14 @@ export default class Kernel {
    */
   register( name, value ) {
     this.registerFactory( name, () => value );
+  }
+
+  /**
+   * Unregisters a name from the kernel.
+   * @param {String} name
+   */
+  unregister( name ) {
+    delete this._registry.targets[ name ];
   }
 
   /**

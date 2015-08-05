@@ -1,8 +1,8 @@
 {
   "name": "@stephenbunch/di",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Dependency injection library.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "prepublish": "gulp"
   },

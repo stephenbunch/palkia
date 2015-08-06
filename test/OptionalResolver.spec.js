@@ -14,11 +14,4 @@ describe( 'OptionalResolver', function() {
       kernel.resolve( 'foo' );
     }).to.throw( ServiceNotFoundError );
   });
-
-  it( 'should return locals when they exist', function() {
-    var kernel = new Kernel();
-    var target = [ 'foo?', foo => foo ];
-    var locals = { foo: 2 };
-    expect( kernel.invoke( target, locals ) ).to.equal( 2 );
-  });
 });

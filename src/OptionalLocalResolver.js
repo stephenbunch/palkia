@@ -1,4 +1,4 @@
-export default class OptionalResolver {
+export default class OptionalLocalResolver {
   constructor( kernel ) {
     this.kernel = kernel;
     this.pattern = /\?$/;
@@ -6,15 +6,12 @@ export default class OptionalResolver {
 
   /**
    * @param {String} name
+   * @param {Object} locals
    */
-  resolve( name ) {
+  resolve( name, locals ) {
     if ( this.pattern.test( name ) ) {
       name = name.substr( 0, name.length - 1 );
-      if ( this.kernel.isNameRegistered( name ) ) {
-        return this.kernel.factoryFor( name );
-      } else {
-        return () => undefined;
-      }
+      return locals[ name ];
     }
   }
 };

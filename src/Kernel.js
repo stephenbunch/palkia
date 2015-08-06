@@ -3,6 +3,7 @@ import CommonJsResolver from './CommonJsResolver';
 import LazyResolver from './LazyResolver';
 import Linker from './Linker';
 import OptionalResolver from './OptionalResolver';
+import OptionalLocalResolver from './OptionalLocalResolver';
 import Recipe from './Recipe';
 import Registry from './Registry';
 import { matchFromPattern, recipeFromTarget, validateTarget } from './util';
@@ -14,6 +15,7 @@ export default class Kernel {
     this._linker.delegate = this._registry;
     this._registry.resolvers.push( new LazyResolver( this ) );
     this._registry.resolvers.push( new OptionalResolver( this ) );
+    this.localResolvers = [ new OptionalLocalResolver( this ) ];
   }
 
   /**
@@ -381,16 +383,21 @@ export default class Kernel {
     recipe.name = name || recipe.name;
     if ( locals ) {
       recipe.ingredients = recipe.ingredients.map( x => {
-        var target;
-        if ( locals[ x ] !== undefined ) {
-          target = () => locals[ x ];
+        var local = locals[ x ];
+        if ( local === undefined ) {
+          local = this.localResolvers.reduce( ( value, handler ) => {
+            if ( value === undefined ) {
+              return handler.resolve( x, locals );
+            } else {
+              return value;
+            }
+          }, undefined );
         }
-        if ( !target ) {
-          target = this._registry.resolvers.reduce( ( value, handler ) => {
-            return value || handler.resolve( x, undefined, locals );
-          }, null );
+        if ( local !== undefined ) {
+          return () => local;
+        } else {
+          return x;
         }
-        return target || x;
       });
     }
     return recipe;

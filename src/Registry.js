@@ -116,7 +116,7 @@ export default class Registry {
     var target = this.resolvers.reduce( ( target, handler ) => {
       return target || handler.resolve( name, namedNode );
     }, null );
-    if ( !target ) {
+    if ( target === undefined ) {
       let message = `Could not locate service '${ name }'`;
       if ( namedNode && namedNode.name ) {
         message += ` for '${ namedNode.name }'`;

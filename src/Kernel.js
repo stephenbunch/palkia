@@ -377,15 +377,22 @@ export default class Kernel {
       target = name;
       name = null;
     }
-    locals = locals || {};
     var recipe = recipeFromTarget( target );
     recipe.name = name || recipe.name;
-    recipe.ingredients = recipe.ingredients.map( x => {
-      if ( locals[ x ] ) {
-        return () => locals[ x ]
-      };
-      return x;
-    });
+    if ( locals ) {
+      recipe.ingredients = recipe.ingredients.map( x => {
+        var target;
+        if ( locals[ x ] !== undefined ) {
+          target = () => locals[ x ];
+        }
+        if ( !target ) {
+          target = this._registry.resolvers.reduce( ( value, handler ) => {
+            return value || handler.resolve( x, undefined, locals );
+          }, null );
+        }
+        return target || x;
+      });
+    }
     return recipe;
   }
 

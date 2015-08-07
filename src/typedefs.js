@@ -6,9 +6,14 @@
 /**
  * A function to be invoked, or an array where the last element is a function
  * and the rest of the elements are the names of dependencies to be injected.
- * If target is a function, the $inject property may also be used. See
- * https://docs.angularjs.org/api/auto/service/$injector
  * @typedef {Array.<String|Target|Function>|Function} Target
+ */
+
+/**
+ * An async function to be invoked, or an array where the last element is an
+ * async function and the rest of the elements are the names of dependencies to
+ * be injected.
+ * @typedef {Array.<String|Function>|Function} AsyncTarget
  */
 
 /**

@@ -242,4 +242,16 @@ describe( 'Kernel', function() {
       expect( kernel.resolve( 'foo' ) ).to.equal( 2 );
     });
   });
+
+  describe( '.registerAsyncFactoryAsSingleton( name, factory )', function() {
+    it( 'should register an async delegate whose value is cached', async function() {
+      var kernel = new Kernel();
+      kernel.registerAsyncFactoryAsSingleton( 'foo', () => Promise.resolve( 2 ) );
+      kernel.registerAsyncFactoryAsSingleton( 'bar', [ 'foo', foo => Promise.resolve( foo * 5 ) ]);
+      expect( await kernel.resolveAsync( 'bar' ) ).to.equal( 10 );
+
+      kernel.registerAsyncFactoryAsSingleton( 'baz', () => Promise.resolve( {} ) );
+      expect( await kernel.resolveAsync( 'baz' ) ).to.equal( await kernel.resolveAsync( 'baz' ) );
+    });
+  });
 });

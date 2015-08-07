@@ -234,7 +234,7 @@ export default class Kernel {
    * Registers a factory with the kernel who's value will be cached for all
    * future requests.
    * @param {String} name
-   * @param {Target} target
+   * @param {Target} factory
    */
   registerFactoryAsSingleton( name, factory ) {
     validateTarget( factory );
@@ -245,6 +245,29 @@ export default class Kernel {
         instance = recipe.create.apply( undefined, args );
       }
       return instance;
+    });
+  }
+
+  /**
+   * Registers an async factory as an async delegate.
+   * @param {String} name
+   * @param {AsyncTarget} factory
+   */
+  registerAsyncFactoryAsSingleton( name, factory ) {
+    var promise;
+    this.asyncResolvers.push({
+      resolveAsync: _name => {
+        return Promise.resolve().then( () => {
+          if ( _name === name ) {
+            if ( !promise ) {
+              promise = this.invokeAsync( name, factory ).then( value => {
+                return () => value;
+              });
+            }
+            return promise;
+          }
+        });
+      }
     });
   }
 

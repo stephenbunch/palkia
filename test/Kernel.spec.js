@@ -253,5 +253,18 @@ describe( 'Kernel', function() {
       kernel.registerAsyncFactoryAsSingleton( 'baz', () => Promise.resolve( {} ) );
       expect( await kernel.resolveAsync( 'baz' ) ).to.equal( await kernel.resolveAsync( 'baz' ) );
     });
+
+    it( 'should be invoked as a child', async function() {
+      var kernel = new Kernel();
+      kernel.asyncResolvers.push({
+        async resolveAsync( name, namedNode ) {
+          if ( name === 'foo', namedNode.isChildNode ) {
+            return () => 2;
+          }
+        }
+      });
+      kernel.registerAsyncFactoryAsSingleton( 'bar', [ 'foo', x => x ] );
+      expect( await kernel.resolveAsync( 'bar' ) ).to.equal( 2 );
+    });
   });
 });

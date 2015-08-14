@@ -260,7 +260,7 @@ export default class Kernel {
         return Promise.resolve().then( () => {
           if ( _name === name ) {
             if ( !promise ) {
-              promise = this.invokeAsync( name, factory ).then( value => {
+              promise = this.invokeChildAsync( name, factory ).then( value => {
                 return () => value;
               });
             }

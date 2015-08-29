@@ -10,7 +10,7 @@ export default class OptionalResolver {
   resolve( name ) {
     if ( this.pattern.test( name ) ) {
       name = name.substr( 0, name.length - 1 );
-      if ( this.kernel.isNameRegistered( name ) ) {
+      if ( this.kernel.targetForName( name ) ) {
         return this.kernel.factoryFor( name );
       } else {
         return () => undefined;

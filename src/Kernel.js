@@ -61,14 +61,6 @@ export default class Kernel {
   }
 
   /**
-   * @param {String} name
-   * @returns {Boolean}
-   */
-  isNameRegistered( name ) {
-    return !!this._registry.targets[ name ];
-  }
-
-  /**
    * Resolves a named service.
    * @param {String} name
    * @returns {*}
@@ -277,20 +269,10 @@ export default class Kernel {
    * @param {String} originalName
    */
   registerAlias( aliasName, originalName ) {
-    this.redirect( aliasName, () => originalName );
-  }
-
-  /**
-   * Registers a redirect handler.
-   * @param {Pattern} pattern
-   * @param {RedirectHandler} handler
-   */
-  redirect( pattern, handler ) {
-    var match = matchFromPattern( pattern );
     this._registry.redirects.push({
-      redirect( name, namedNode ) {
-        if ( match( name ) ) {
-          return handler( name, namedNode );
+      redirect( name ) {
+        if ( name === aliasName ) {
+          return originalName;
         }
       }
     });
@@ -331,31 +313,6 @@ export default class Kernel {
   }
 
   /**
-   * Registers another kernel to provide resolutions.
-   * @param {Pattern} pattern
-   * @param {Kernel} kernel
-   */
-  delegateTo( pattern, kernel ) {
-    var match = matchFromPattern( pattern );
-    this._registry.resolvers.push({
-      resolve( name ) {
-        if ( match( name ) ) {
-          return kernel.factoryFor( name );
-        }
-      }
-    });
-    this._registry.asyncResolvers.push({
-      resolveAsync( name ) {
-        return Promise.resolve().then( () => {
-          if ( match( name ) ) {
-            return kernel.factoryForAsync( name );
-          }
-        });
-      }
-    });
-  }
-
-  /**
    * Registers another kernel to provide resolutions for the specified
    * namespace.
    * @param {String} namespace
@@ -384,7 +341,7 @@ export default class Kernel {
    * @param {String} name
    * @returns {Target|undefined}
    */
-  targetFromName( name ) {
+  targetForName( name ) {
     return this._registry.targets[ name ];
   }
 

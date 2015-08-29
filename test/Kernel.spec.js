@@ -133,51 +133,6 @@ describe( 'Kernel', function() {
     });
   });
 
-  describe( '.delegate( pattern, handler )', function() {
-    it( 'should register a synchronous delegating handler', function() {
-      var kernel = new Kernel();
-      var handler = sinon.stub().returns( () => 2 );
-      kernel.delegate( 'foo', handler );
-      expect( kernel.invoke( 'thing', [ 'foo', foo => foo ] ) ).to.equal( 2 );
-      expect( handler ).to.have.been.calledWith( 'foo', {
-        name: 'thing',
-        isChildNode: false
-      });
-    });
-  });
-
-  describe( '.delegateAsync( pattern, handler )', function() {
-    it( 'should register an asynchronous delegating handler', async function() {
-      var kernel = new Kernel();
-      var handler = sinon.stub().returns( Promise.resolve( () => 2 ) );
-      kernel.delegateAsync( 'foo', handler );
-      expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
-    });
-
-    it( 'should not run if a synchronous delegate can provide', async function() {
-      var kernel = new Kernel();
-      var syncHandler = sinon.stub().returns( () => 2 );
-      var asyncHandler = sinon.stub().returns( Promise.reject( new Error( 'should not be called' ) ) );
-      kernel.delegate( 'foo', syncHandler );
-      kernel.delegateAsync( 'foo', asyncHandler );
-      expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
-    });
-  });
-
-  describe( '.delegateTo( pattern, kernel )', function() {
-    it( 'should register a kernel to provide resolutions', async function() {
-      var a = new Kernel();
-      var b = new Kernel();
-      var syncHandler = sinon.stub().returns( () => 2 );
-      var asyncHandler = sinon.stub().returns( Promise.resolve( () => 3 ) );
-      b.delegate( 'foo', syncHandler );
-      b.delegateAsync( 'bar', asyncHandler );
-      a.delegateTo( /(foo|bar)/, b );
-      expect( a.resolve( 'foo' ) ).to.equal( 2 );
-      expect( await a.resolveAsync( 'bar' ) ).to.equal( 3 );
-    });
-  });
-
   describe( '.delegateNamespace', function() {
     it( 'should register a kernel to provide resolutions for the specified namespace', async function() {
       var a = new Kernel();
@@ -189,48 +144,6 @@ describe( 'Kernel', function() {
       a.delegateNamespace( 'b:', b );
       expect( a.resolve( 'b:foo' ) ).to.equal( 2 );
       expect( await a.resolveAsync( 'b:bar' ) ).to.equal( 3 );
-    });
-  });
-
-  describe( '.redirect( pattern, handler )', function() {
-    it( 'should register a redirect handler', function() {
-      var kernel = new Kernel();
-      kernel.redirect( 'foo', () => 'bar' );
-      kernel.register( 'bar', 2 );
-      expect( kernel.resolve( 'foo' ) ).to.equal( 2 );
-    });
-
-    it( 'should work with asynchronous resolutions', async function() {
-      var kernel = new Kernel();
-      kernel.redirect( 'foo', () => 'bar' );
-      kernel.delegateAsync( 'bar', async function() {
-        return () => 2;
-      });
-      kernel.registerFactory( 'baz', [ 'foo', foo => foo ] );
-      var foo = await kernel.resolveAsync( 'baz' );
-      expect( foo ).to.equal( 2 );
-    });
-
-    it( 'should pass information about the named node', function() {
-      var kernel = new Kernel();
-      kernel.redirect( 'foo', ( name, namedNode ) => {
-        if ( namedNode.isChildNode ) {
-          return '_foo';
-        }
-      });
-      kernel.register( '_foo', 2 );
-      expect( () => {
-        kernel.resolve( 'foo' );
-      }).to.throw( ServiceNotFoundError );
-      kernel.registerFactory( 'bar', [ 'foo', foo => foo ] );
-      expect( kernel.resolve( 'bar' ) ).to.equal( 2 );
-      expect( () => {
-        kernel.invoke([ 'foo', foo => foo ]);
-      }).to.throw( ServiceNotFoundError );
-      expect( kernel.invokeChild( 'test', [ 'foo', foo => foo ] ) ).to.equal( 2 );
-      expect( () => {
-        kernel.invoke( 'test', [ 'foo', foo => foo ] );
-      }).to.throw( ServiceNotFoundError );
     });
   });
 

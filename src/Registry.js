@@ -72,7 +72,7 @@ export default class Registry {
     var history = [];
     while ( true ) {
       if ( history.indexOf( name ) > -1 ) {
-        throw new InvalidOperationError( `Redirect loop encountered while resolving '${ initial }' for '${ target || '' }'` );
+        throw new InvalidOperationError( `Redirect loop encountered while resolving '${ name }' for '${ initial }'` );
       } else {
         history.push( name );
       }

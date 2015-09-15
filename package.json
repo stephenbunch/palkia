@@ -1,6 +1,6 @@
 {
   "name": "dialga",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dependency injection library.",
   "main": "dist/node",
   "scripts": {
@@ -14,10 +14,10 @@
   "license": "MIT",
   "devDependencies": {
     "arceus": "^0.2.0",
+    "babel": "^5.8.23",
     "gulp": "^3.8.11"
   },
   "dependencies": {
-    "babel": "^5.8.23",
     "glob": "^5.0.14",
     "lodash.assign": "^3.2.0",
     "scriptjs": "^2.5.7"

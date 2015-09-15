@@ -1,4 +1,4 @@
-import { Kernel } from '../src/index';
+import { Kernel } from '../src/node';
 
 describe( 'LazyResolver', function() {
   it( 'should return a promise if the lazy syntax is used', async function() {

@@ -1,6 +1,6 @@
 import Recipe from './Recipe';
 import Component from './Component';
-import { when, recipeFromTarget } from './util';
+import { recipeFromTarget } from './util';
 import InvalidOperationError from './InvalidOperationError';
 
 export default class Linker {
@@ -54,7 +54,7 @@ export default class Linker {
             isChildNode: !!component.parent
           }
         ).then( recipes => {
-          return when(
+          return Promise.all(
             component.recipe.ingredients.map( ( ingredient, index ) => {
               var recipe;
               if ( typeof ingredient === 'string' ) {

@@ -1,4 +1,4 @@
-import { pathCombine } from './util';
+import { combinePaths } from './util';
 
 export default class CommonJsResolver {
   /**
@@ -12,6 +12,6 @@ export default class CommonJsResolver {
    * @param {String} name
    */
   resolve( name ) {
-    return require( pathCombine( this.baseDir, name ) );
+    return require( combinePaths( this.baseDir, name ) );
   }
 };

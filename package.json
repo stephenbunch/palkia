@@ -1,19 +1,25 @@
 {
-  "name": "@stephenbunch/di",
-  "version": "0.5.1",
+  "name": "dialga",
+  "version": "0.1.0",
   "description": "Dependency injection library.",
-  "main": "lib/index.js",
+  "main": "dist/node",
   "scripts": {
     "prepublish": "gulp"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stephenbunch/di"
+    "url": "https://github.com/stephenbunch/dialga"
   },
   "author": "Stephen Bunch",
   "license": "MIT",
   "devDependencies": {
-    "@stephenbunch/buildpack": "^0.4.0",
+    "arceus": "^0.2.0",
     "gulp": "^3.8.11"
+  },
+  "dependencies": {
+    "babel": "^5.8.23",
+    "glob": "^5.0.14",
+    "lodash.assign": "^3.2.0",
+    "scriptjs": "^2.5.7"
   }
 }

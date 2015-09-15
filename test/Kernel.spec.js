@@ -2,7 +2,7 @@ import {
   Kernel,
   ServiceNotFoundError,
   InvalidOperationError
-} from '../src/index';
+} from '../src/node';
 
 describe( 'Kernel', function() {
   describe( '.resolve( name )', function() {

@@ -1,7 +1,6 @@
 import Recipe from './Recipe';
 import {
   recipeFromTarget,
-  when,
   distinct,
   validateTarget
 } from './util';
@@ -50,7 +49,7 @@ export default class Registry {
    */
   recipesByNameAsync( names, namedNode ) {
     names = distinct( names );
-    return when(
+    return Promise.all(
       names.map( name => this._locateTargetAsync( name, namedNode ) )
     ).then( targets => {
       var recipes = {};

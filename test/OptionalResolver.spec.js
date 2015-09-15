@@ -1,7 +1,7 @@
 import {
   Kernel,
   ServiceNotFoundError
-} from '../src/index';
+} from '../src/node';
 
 describe( 'OptionalResolver', function() {
   it( 'should return undefined if the optional syntax is used and the value is unregistered', function() {

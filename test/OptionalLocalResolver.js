@@ -1,7 +1,7 @@
 import {
   Kernel,
   ServiceNotFoundError
-} from '../src/index';
+} from '../src/node';
 
 describe( 'OptionalLocalResolver', function() {
   it( 'should return locals when they exist', function() {

@@ -52,7 +52,8 @@ export default class Bundle {
     {
       ignore = [],
       asyncServices = false,
-      namespace = ''
+      namespace = '',
+      transform = null
     } = {}
   ) {
     for ( let key in modules ) {
@@ -91,14 +92,30 @@ export default class Bundle {
         segments.slice( indexOfDollarSign ).join( '/' ) :
         segments[ segments.length - 1 ];
 
+      let factory = modules[ key ];
+      if ( transform ) {
+        if ( typeof factory === 'function' ) {
+          let _factory = factory;
+          factory = () => transform({ name: key, instance: _factory() });
+        } else {
+          let _factory = factory.pop();
+          factory.push( ( ...args ) => {
+            return transform({
+              name: key,
+              instance: _factory.apply( undefined, args )
+            });
+          });
+        }
+      }
+
       // Modules that begin with '$' also represent a service. Since services
       // will always be singletons, we can allow them to initialize
       // asynchronously.
       try {
         if ( asyncServices && /^_?\$/.test( shortName ) ) {
-          this._kernel.registerAsyncFactoryAsSingleton( fullName, modules[ key ] );
+          this._kernel.registerAsyncFactoryAsSingleton( fullName, factory );
         } else {
-          this._kernel.registerFactoryAsSingleton( fullName, modules[ key ] );
+          this._kernel.registerFactoryAsSingleton( fullName, factory );
         }
       } catch( err ) {
         throw new Error( `Module registration failed for "${ key }" because [${ err.message }]` );

@@ -10,7 +10,9 @@ gulp.task( 'make:src', function() {
 });
 
 gulp.task( 'make', function() {
-  return arceus.util.gulpAsync( gulp, 'clean', [ 'make:src' ] );
+  return arceus.util.gulpAsync( gulp, 'clean', [ 'make:src' ] ).then( function() {
+    return arceus.util.touchFileAsync( 'package.json' );
+  });
 });
 
 gulp.task( 'clean', function() {
@@ -28,13 +30,7 @@ gulp.task( 'test:browser', function() {
 gulp.task( 'test', [ 'test:node', 'test:browser' ] );
 
 gulp.task( 'watch', function() {
-  arceus.util.watch( 'src/**/*', function() {
-    arceus.util.gulpAsync( gulp, 'make:src' ).then( function() {
-      return arceus.util.touchFileAsync( 'package.json' );
-    }).catch( function( err ) {
-      console.log( arceus.util.formatError( err ) );
-    });
-  });
+  arceus.util.gulpWatch( gulp, 'src/**/*', 'make:src' );
 });
 
 gulp.task( 'default', function() {

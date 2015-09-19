@@ -247,16 +247,18 @@ export default class Bundle {
    * @param {Boolean} isInternal
    */
   _delegate( name, toBundle, toName, isInternal ) {
+    var key = `_${ name }`;
+    this._kernel.registerFactory( name, [ key, x => x ] );
     this.registerResolver({
       resolve: ( target ) => {
-        if ( name === target ) {
+        if ( key === target ) {
           return toBundle._kernel.factoryFor( toName );
         }
       }
     }, isInternal );
     this.registerAsyncResolver({
       resolveAsync: async ( target ) => {
-        if ( name === target ) {
+        if ( key === target ) {
           return toBundle._kernel.factoryForAsync( toName );
         }
       }

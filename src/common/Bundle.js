@@ -31,6 +31,14 @@ export default class Bundle {
     this._kernel.register( name, value );
   }
 
+  registerFactory( name, factory ) {
+    this._kernel.registerFactory( name, factory );
+  }
+
+  registerFactoryAsSingleton( name, factory ) {
+    this._kernel.registerFactoryAsSingleton( name, factory );
+  }
+
   resolve( name ) {
     return this._kernel.resolve( name );
   }

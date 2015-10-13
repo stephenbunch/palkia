@@ -70,9 +70,26 @@ export default class WebBundle extends Bundle {
 
   /**
    * @param {String} name
-   * @param {StyleParams}
+   * @param {StyleParams} style
+   */
+  registerStyle( name, style ) {
+    this._registerStyle( name, style, false );
+  }
+
+  /**
+   * @param {String} name
+   * @param {StyleParams} style
    */
   registerInternalStyle( name, style ) {
+    this._registerStyle( name, style, true );
+  }
+
+  /**
+   * @param {String} name
+   * @param {StyleParams} style
+   * @param {Boolean} isInternal
+   */
+  _registerStyle( name, style, isInternal ) {
     var promise;
     this.registerAsyncResolver({
       resolveAsync: async ( target ) => {
@@ -86,7 +103,7 @@ export default class WebBundle extends Bundle {
           return promise;
         }
       }
-    }, true );
+    }, isInternal );
   }
 
   /**

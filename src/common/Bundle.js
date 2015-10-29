@@ -39,6 +39,10 @@ export default class Bundle {
     this._kernel.registerFactoryAsSingleton( name, factory );
   }
 
+  registerAsyncFactoryAsSingleton( name, factory ) {
+    this._kernel.registerAsyncFactoryAsSingleton( name, factory );
+  }
+
   resolve( name ) {
     return this._kernel.resolve( name );
   }

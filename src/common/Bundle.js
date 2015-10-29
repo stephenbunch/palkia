@@ -65,7 +65,8 @@ export default class Bundle {
       ignore = [],
       asyncServices = false,
       namespace = '',
-      transform = null
+      transform = null,
+      transformAsync = null
     } = {}
   ) {
     for ( let key in modules ) {
@@ -105,14 +106,15 @@ export default class Bundle {
         segments[ segments.length - 1 ];
 
       let factory = modules[ key ];
-      if ( transform ) {
+      if ( transform || transformAsync ) {
+        let t = transformAsync || transform;
         if ( typeof factory === 'function' ) {
           let _factory = factory;
-          factory = () => transform({ name: key, instance: _factory() });
+          factory = () => t({ name: key, instance: _factory() });
         } else {
           let _factory = factory.pop();
           factory.push( ( ...args ) => {
-            return transform({
+            return t({
               name: key,
               instance: _factory.apply( undefined, args )
             });
@@ -124,7 +126,7 @@ export default class Bundle {
       // will always be singletons, we can allow them to initialize
       // asynchronously.
       try {
-        if ( asyncServices && /^_?\$/.test( shortName ) ) {
+        if ( asyncServices && /^_?\$/.test( shortName ) || transformAsync ) {
           this._kernel.registerAsyncFactoryAsSingleton( fullName, factory );
         } else {
           this._kernel.registerFactoryAsSingleton( fullName, factory );

@@ -1,6 +1,6 @@
 {
   "name": "dialga",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Dependency injection library.",
   "main": "dist/node",
   "scripts": {
@@ -21,6 +21,7 @@
     "gulp": "^3.8.11"
   },
   "dependencies": {
+    "classlist-polyfill": "^1.0.2",
     "glob": "^5.0.14",
     "lodash.assign": "^3.2.0",
     "scriptjs": "^2.5.7"

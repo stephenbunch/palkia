@@ -16,7 +16,7 @@
     "url": "https://github.com/stephenbunch/dialga/issues"
   },
   "devDependencies": {
-    "arceus": "^0.2.0",
+    "arceus": "^0.3.0",
     "babel": "^5.8.23",
     "gulp": "^3.8.11"
   },

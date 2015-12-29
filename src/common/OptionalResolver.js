@@ -17,4 +17,17 @@ export default class OptionalResolver {
       }
     }
   }
+
+  resolveAsync( name ) {
+    if ( this.pattern.test( name ) ) {
+      name = name.substr( 0, name.length - 1 );
+      if ( this.kernel.asyncTargetForName( name ) ) {
+        return this.kernel.factoryForAsync( name );
+      } else {
+        return Promise.resolve( () => undefined );
+      }
+    } else {
+      return Promise.resolve();
+    }
+  }
 };

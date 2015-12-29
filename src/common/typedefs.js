@@ -10,10 +10,16 @@
  */
 
 /**
+ * @name AsyncTarget
+ * @function
+ * @returns {Promise.<Target>}
+ */
+
+/**
  * An async function to be invoked, or an array where the last element is an
  * async function and the rest of the elements are the names of dependencies to
  * be injected.
- * @typedef {Array.<String|Function>|Function} AsyncTarget
+ * @typedef {Array.<String|Target|Function>|Function} AsyncFactory
  */
 
 /**

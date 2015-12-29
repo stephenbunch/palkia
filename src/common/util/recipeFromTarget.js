@@ -1,19 +1,14 @@
 import Recipe from '../Recipe';
+import arrayFromTarget from './arrayFromTarget';
 
 /**
  * @param {Target} target
  * @returns {Recipe}
  */
 export default function( target ) {
-  var deps;
-  if ( typeof target === 'function' ) {
-    deps = target.$inject || [];
-  } else {
-    deps = target.slice();
-    target = deps.pop();
-  }
+  target = arrayFromTarget( target );
   return new Recipe({
-    create: target,
-    ingredients: deps
+    create: target[ target.length - 1 ],
+    ingredients: target.slice( 0, target.length - 1 )
   });
 };

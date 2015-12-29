@@ -156,8 +156,32 @@ describe( 'Kernel', function() {
     });
   });
 
+  describe( '.registerAsyncFactory( name, factory )', function() {
+    it( 'should register an async target', async function() {
+      var kernel = new Kernel();
+      kernel.registerAsyncFactory( 'foo', () => Promise.resolve( 2 ) );
+      expect( await kernel.resolveAsync( 'foo' ) ).to.equal( 2 );
+    });
+
+    it( 'should register an async target that returns a new value each time', async function() {
+      var kernel = new Kernel();
+      kernel.registerAsyncFactory( 'foo', () => Promise.resolve( {} ) );
+      expect( await kernel.resolveAsync( 'foo' ) )
+        .to.not.equal( await kernel.resolveAsync( 'foo' ) );
+    });
+
+    // it( 'should throw an error when a circular dependency is detected', async function() {
+    //   var kernel = new Kernel();
+    //   kernel.registerAsyncFactory( 'foo', [ 'bar', bar => bar ] );
+    //   kernel.registerAsyncFactory( 'bar', [ 'baz', baz => baz ] );
+    //   kernel.registerAsyncFactory( 'baz', [ 'foo', foo => foo ] );
+    //   await expect( kernel.resolveAsync( 'foo' ) )
+    //     .to.eventually.be.rejectedWith( InvalidOperationError );
+    // });
+  });
+
   describe( '.registerAsyncFactoryAsSingleton( name, factory )', function() {
-    it( 'should register an async delegate whose value is cached', async function() {
+    it( 'should register an async target whose value is cached', async function() {
       var kernel = new Kernel();
       kernel.registerAsyncFactoryAsSingleton( 'foo', () => Promise.resolve( 2 ) );
       kernel.registerAsyncFactoryAsSingleton( 'bar', [ 'foo', foo => Promise.resolve( foo * 5 ) ]);

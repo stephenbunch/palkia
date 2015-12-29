@@ -1,4 +1,5 @@
 import Kernel from './Kernel';
+import arrayFromTarget from './util/arrayFromTarget';
 
 export default class Bundle {
   constructor( name ) {
@@ -63,7 +64,7 @@ export default class Bundle {
     modules,
     {
       ignore = [],
-      asyncServices = false,
+      asyncModules = false,
       namespace = '',
       transform = null,
       transformAsync = null
@@ -92,41 +93,34 @@ export default class Bundle {
 
       let segments = key.split( '/' );
       let fullName = namespace + key;
-
-      let indexOfDollarSign = -1;
-      for ( let segment of segments ) {
-        if ( segment.startsWith( '$' ) ) {
-          indexOfDollarSign = segments.indexOf( segment );
-          break;
-        }
-      }
-      let shortName =
-        indexOfDollarSign > -1 ?
-        segments.slice( indexOfDollarSign ).join( '/' ) :
-        segments[ segments.length - 1 ];
+      let shortName = segments[ segments.length - 1 ];
 
       let factory = modules[ key ];
-      if ( transform || transformAsync ) {
+
+      let f = arrayFromTarget( modules[ key ] );
+      let deps = f.slice( 0, f.length - 1 );
+      f = f[ f.length - 1 ];
+
+      if ( asyncModules ) {
         let t = transformAsync || transform;
-        if ( typeof factory === 'function' ) {
-          let _factory = factory;
-          factory = () => t({ name: key, instance: _factory() });
-        } else {
-          let _factory = factory.pop();
-          factory.push( ( ...args ) => {
-            return t({
-              name: key,
-              instance: _factory.apply( undefined, args )
-            });
-          });
+        if ( t ) {
+          factory = [ ...deps, ( ...args ) =>
+            Promise.resolve()
+              .then( () => f.apply( undefined, args ) )
+              .then( instance => t({ name: key, instance }) )
+          ];
         }
+      } else if ( transform ) {
+        factory = [ ...deps, ( ...args ) =>
+          transform({
+            name: key,
+            instance: f.apply( undefined, args )
+          })
+        ]
       }
 
-      // Modules that begin with '$' also represent a service. Since services
-      // will always be singletons, we can allow them to initialize
-      // asynchronously.
       try {
-        if ( asyncServices && /^_?\$/.test( shortName ) || transformAsync ) {
+        if ( asyncModules ) {
           this._kernel.registerAsyncFactoryAsSingleton( fullName, factory );
         } else {
           this._kernel.registerFactoryAsSingleton( fullName, factory );

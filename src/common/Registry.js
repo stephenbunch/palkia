@@ -15,19 +15,24 @@ export default class Registry {
     this.targets = {};
 
     /**
+     * @type {Object.<String, AsyncTarget>}
+     */
+    this.asyncTargets = {};
+
+    /**
      * @type {Array.<ResolveHandler>}
      */
     this.resolvers = [];
 
     /**
-     * @type {Array.<RedirectHandler}
-     */
-    this.redirects = [];
-
-    /**
      * @type {Array.<AsyncResolveHandler}
      */
     this.asyncResolvers = [];
+
+    /**
+     * @type {Array.<RedirectHandler}
+     */
+    this.redirects = [];
   }
 
   /**
@@ -133,29 +138,28 @@ export default class Registry {
    * @returns {Promise.<Target>}
    */
   _locateTargetAsync( name, namedNode ) {
+    if ( this.asyncTargets[ name ] ) {
+      return this.asyncTargets[ name ]();
+    }
+    if ( this.targets[ name ] ) {
+      return this.targets[ name ];
+    }
     var resolvers = this.asyncResolvers.slice();
-    return Promise.resolve().then( () => {
-      try {
-        // Search synchronous resolvers first.
+    var next = () => {
+      var resolver = resolvers.shift();
+      if ( resolver ) {
+        return resolver.resolveAsync( name, namedNode ).then( target => {
+          return target || next();
+        });
+      }
+    };
+    return Promise.resolve().then( next ).then( target => {
+      if ( target === undefined ) {
         return this._locateTarget( name, namedNode );
-      } catch ( err ) {
-        return (
-          function next() {
-            var resolver = resolvers.shift();
-            if ( resolver ) {
-              return resolver.resolveAsync( name, namedNode ).then( target => {
-                return target || next();
-              });
-            }
-          }
-        ).call( this );
-      }
-    }).then( target => {
-      if ( target ) {
+      } else {
         validateTarget( target );
-        return target;
       }
-      return this._locateTarget( name, namedNode );
+      return target;
     });
   }
 };

@@ -6,7 +6,12 @@ import OptionalResolver from './OptionalResolver';
 import OptionalLocalResolver from './OptionalLocalResolver';
 import Recipe from './Recipe';
 import Registry from './Registry';
-import { matchFromPattern, recipeFromTarget, validateTarget } from './util';
+import {
+  arrayFromTarget,
+  matchFromPattern,
+  recipeFromTarget,
+  validateTarget
+} from './util';
 
 export default class Kernel {
   constructor() {
@@ -15,6 +20,7 @@ export default class Kernel {
     this._linker.delegate = this._registry;
     this._registry.resolvers.push( new LazyResolver( this ) );
     this._registry.resolvers.push( new OptionalResolver( this ) );
+    this._registry.asyncResolvers.push( new OptionalResolver( this ) );
     this.localResolvers = [ new OptionalLocalResolver( this ) ];
   }
 
@@ -210,6 +216,7 @@ export default class Kernel {
    */
   unregister( name ) {
     delete this._registry.targets[ name ];
+    delete this._registry.asyncTargets[ name ];
   }
 
   /**
@@ -230,37 +237,34 @@ export default class Kernel {
    */
   registerFactoryAsSingleton( name, factory ) {
     validateTarget( factory );
-    var instance;
-    var recipe = recipeFromTarget( factory );
-    this._registry.targets[ name ] = recipe.ingredients.concat( ( ...args ) => {
-      if ( instance === undefined ) {
-        instance = recipe.create.apply( undefined, args );
-      }
-      return instance;
-    });
+    this._registry.targets[ name ] = this._singletonFactory( factory );
+  }
+
+  /**
+   * Registers an async factory with the kernel.
+   * @param {String} name
+   * @param {AsyncFactory} factory
+   */
+  registerAsyncFactory( name, factory ) {
+    validateTarget( factory );
+    this._registry.asyncTargets[ name ] = this._asyncFactory( name, factory );
   }
 
   /**
    * Registers an async factory as an async delegate.
    * @param {String} name
-   * @param {AsyncTarget} factory
+   * @param {AsyncFactory} factory
    */
   registerAsyncFactoryAsSingleton( name, factory ) {
-    var promise;
-    this.asyncResolvers.push({
-      resolveAsync: _name => {
-        return Promise.resolve().then( () => {
-          if ( _name === name ) {
-            if ( !promise ) {
-              promise = this.invokeChildAsync( name, factory ).then( value => {
-                return () => value;
-              });
-            }
-            return promise;
-          }
-        });
+    validateTarget( factory );
+    factory = this._asyncFactory( name, factory );
+    var instance;
+    this._registry.asyncTargets[ name ] = () => {
+      if ( instance === undefined ) {
+        instance = factory();
       }
-    });
+      return instance;
+    };
   }
 
   /**
@@ -346,6 +350,19 @@ export default class Kernel {
   }
 
   /**
+   * @param {String} name
+   * @returns {AsyncTarget|undefined}
+   */
+  asyncTargetForName( name ) {
+    if ( this._registry.asyncTargets[ name ] ) {
+      return this._registry.asyncTargets[ name ];
+    } else if ( this._registry.targets[ name ] ) {
+      let target = this._registry.targets[ name ];
+      return () => Promise.resolve( target );
+    }
+  }
+
+  /**
    * @param {String} [name] Optional name of the parent node.
    * @param {Target} target
    * @param {Object.<String, *>} [locals]
@@ -390,5 +407,28 @@ export default class Kernel {
         this._recipeFromArgs( name, target, locals )
       ]
     });
+  }
+
+  _singletonFactory( factory ) {
+    var instance;
+    var recipe = recipeFromTarget( factory );
+    return recipe.ingredients.concat( ( ...args ) => {
+      if ( instance === undefined ) {
+        instance = recipe.create.apply( undefined, args );
+      }
+      return instance;
+    });
+  }
+
+  _asyncFactory( name, factory ) {
+    var recipe = recipeFromTarget( factory );
+    return () => this.invokeChildAsync(
+      name,
+      recipe.ingredients.concat([ ( ...args ) =>
+        Promise.resolve()
+          .then( () => recipe.create.apply( undefined, args ) )
+          .then( value => () => value )
+      ])
+    );
   }
 };

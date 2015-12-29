@@ -1,12 +1,15 @@
+List<T> -> Array<T>
+Map<Key, Value> -> { [ Key ]: Value }
+Null -> null
+Void -> undefined
+
 Factory -> [ ...String | Factory, function(): Any ] | function(): Any
 AsyncFactory -> [ ...String | AsyncFactory, function(): Promise ] | function(): Promise
 
-Target -> [ ...String | Target, function(): Any ]
-AsyncTarget -> function( parent: Node ): Promise<Target>
+Parents -> List<String>
 
-Node
-  name: String?
-  parents: List<String>
+Target -> [ ...String | Target, function(): Any ]
+AsyncTarget -> function( parents: Parents ): Promise<Target>
 
 Kernel
   resolvers: List<Resolver>
@@ -15,27 +18,28 @@ Kernel
   registerFactory( name: String, factory: Factory )
   registerFactoryAsSingleton( name: String, factory: Factory )
   registerAsyncFactory( name: String, factory: Factory | AsyncFactory )
-  registerAsyncFactoryAsSingleton( name: String, factory: Factory )
+  registerAsyncFactoryAsSingleton( name: String, factory: Factory | AsyncFactory )
   resolve( name: String ): Any
   resolveAsync( name: String ): Promise<Any>
   unregister( name: String )
   invoke( factory: Factory ): Any
   invokeAsync( factory: Factory | AsyncFactory ): Promise<Any>
-  invokeChild( parent: Node, factory: Factory ): Promise<Any>
-  invokeChildAsync( parent: Node, factory: Factory | AsyncFactory ): Promise<Any>
+  invokeChild( factory: Factory, parents: Parents ): Promise<Any>
+  invokeChildAsync( factory: Factory | AsyncFactory, parents: Parents ): Promise<Any>
 
 targetFromFactory( factory: Factory ): Target
-asyncTargetFromFactory( factory: Factory | AsyncFactory ): AsyncTarget
+asyncFactoryFromFactory( factory: Factory ): AsyncFactory
+asyncTargetFromAsyncFactory( factory: AsyncFactory ): AsyncTarget
 
 Linker
-  objectFromTarget( target: Target, parent: Node? ): Any
-  objectFromTargetAsync( target: Target, parent: Node? ): Promise<Any>
+  objectFromTarget( target: Target, parents: Parents ): Any
+  objectFromTargetAsync( target: Target, parents: Parents ): Promise<Any>
 
 Resolver
-  resolve( name: String, node: Node ): Factory | Void
+  resolve( name: String, parents: Parents ): Factory | Void
 
 AsyncResolver
-  resolveAsync( name: String, node: Node ): Promise<Factory | Void>
+  resolveAsync( name: String, parents: Parents ): Promise<Factory | Void>
 
 Registry
   targets: Map<String, Target>

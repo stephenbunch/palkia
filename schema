@@ -9,9 +9,13 @@ Node
   parents: List<String>
 
 Kernel
+  resolvers: List<Resolver>
+  asyncResolvers: List<AsyncResolver>
   register( name: String, value: Any )
   registerFactory( name: String, factory: Factory )
+  registerFactoryAsSingleton( name: String, factory: Factory )
   registerAsyncFactory( name: String, factory: Factory | AsyncFactory )
+  registerAsyncFactoryAsSingleton( name: String, factory: Factory )
   resolve( name: String ): Any
   resolveAsync( name: String ): Promise<Any>
   unregister( name: String )
@@ -23,11 +27,7 @@ Kernel
 targetFromFactory( factory: Factory ): Target
 asyncTargetFromFactory( factory: Factory | AsyncFactory ): AsyncTarget
 
-Redirector
-  redirect( name: String, node: Node ): String | Void
-
 Linker
-  redirects: List<Redirector>
   objectFromTarget( target: Target, parent: Node? ): Any
   objectFromTargetAsync( target: Target, parent: Node? ): Promise<Any>
 
@@ -35,7 +35,7 @@ Resolver
   resolve( name: String, node: Node ): Factory | Void
 
 AsyncResolver
-  resolveAsync( String, Node ): Promise<Factory | Void>
+  resolveAsync( name: String, node: Node ): Promise<Factory | Void>
 
 Registry
   targets: Map<String, Target>

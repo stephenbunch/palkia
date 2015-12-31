@@ -71,95 +71,97 @@ export default class Bundle {
     } = {}
   ) {
     for ( let key in modules ) {
-
-      // Skip ignored paths.
-      let skip = false;
-      for ( let path of ignore ) {
-        if ( /\/$/.test( path ) ) {
-          if ( key.startsWith( path ) ) {
-            skip = true;
-            break;
-          }
-        } else {
-          if ( key === path ) {
-            skip = true;
-            break;
-          }
-        }
-      }
-      if ( skip ) {
-        continue;
-      }
-
-      let segments = key.split( '/' );
-      let fullName = namespace + key;
-      let shortName = segments[ segments.length - 1 ];
-
-      let factory = modules[ key ];
-
-      let f = arrayFromTarget( modules[ key ] );
-      let deps = f.slice( 0, f.length - 1 );
-      f = f[ f.length - 1 ];
-
-      if ( asyncModules ) {
-        let t = transformAsync || transform;
-        if ( t ) {
-          factory = [ ...deps, ( ...args ) =>
-            Promise.resolve()
-              .then( () => f.apply( undefined, args ) )
-              .then( instance => t({ name: key, instance }) )
-          ];
-        }
-      } else if ( transform ) {
-        factory = [ ...deps, ( ...args ) =>
-          transform({
-            name: key,
-            instance: f.apply( undefined, args )
-          })
-        ]
-      }
-
       try {
-        if ( asyncModules ) {
-          this._kernel.registerAsyncFactoryAsSingleton( fullName, factory );
-        } else {
-          this._kernel.registerFactoryAsSingleton( fullName, factory );
+        // Skip ignored paths.
+        let skip = false;
+        for ( let path of ignore ) {
+          if ( /\/$/.test( path ) ) {
+            if ( key.startsWith( path ) ) {
+              skip = true;
+              break;
+            }
+          } else {
+            if ( key === path ) {
+              skip = true;
+              break;
+            }
+          }
         }
+        if ( skip ) {
+          continue;
+        }
+
+        let segments = key.split( '/' );
+        let fullName = namespace + key;
+        let shortName = segments[ segments.length - 1 ];
+
+        let factory = modules[ key ];
+
+        let f = arrayFromTarget( modules[ key ] );
+        let deps = f.slice( 0, f.length - 1 );
+        f = f[ f.length - 1 ];
+
+        if ( asyncModules ) {
+          let t = transformAsync || transform;
+          if ( t ) {
+            factory = [ ...deps, ( ...args ) =>
+              Promise.resolve()
+                .then( () => f.apply( undefined, args ) )
+                .then( instance => t({ name: key, instance }) )
+            ];
+          }
+        } else if ( transform ) {
+          factory = [ ...deps, ( ...args ) =>
+            transform({
+              name: key,
+              instance: f.apply( undefined, args )
+            })
+          ]
+        }
+
+
+          if ( asyncModules ) {
+            this._kernel.registerAsyncFactoryAsSingleton( fullName, factory );
+          } else {
+            this._kernel.registerFactoryAsSingleton( fullName, factory );
+          }
+
+
+        // Mimic the node convention where requiring a directory requires the
+        // index file.
+        if ( key.endsWith( '/index' ) ) {
+          this._kernel.registerAlias( fullName.replace( /\/index$/, '' ), fullName );
+        }
+
+        // Modules that begin with '_' are treated as internal modules, meaning
+        // they cannot be resolved from the kernel directly.
+
+        // In other words, when we register a module that begins with '_' like
+        // '_Foo', register an alias 'Foo' -> '_Foo', but only enable the alias
+        // when the module is being resolved as a dependency of another module
+        // within the kernel. This means when we try to do a
+        // kernel.resolve( 'Foo' ), we get a ServiceNotFoundError, but if we have
+        // a service 'Bar' that depends on 'Foo', the resolution works.
+
+        if ( /^_/.test( shortName ) ) {
+          let segs = segments.slice();
+          segs.pop();
+          segs.push( shortName.substr( 1 ) );
+          let preferredName = namespace + segs.join( '/' );
+          this._kernel.redirects.push({
+            redirect( name, namedNode ) {
+              if ( namedNode && namedNode.isChildNode && name === preferredName ) {
+                return fullName;
+              }
+            }
+          });
+        }
+
+        this._modules.push( fullName );
+
       } catch( err ) {
         throw new Error( `Module registration failed for "${ key }" because [${ err.message }]` );
       }
-
-      // Mimic the node convention where requiring a directory requires the
-      // index file.
-      if ( key.endsWith( '/index' ) ) {
-        this._kernel.registerAlias( fullName.replace( /\/index$/, '' ), fullName );
-      }
-
-      // Modules that begin with '_' are treated as internal modules, meaning
-      // they cannot be resolved from the kernel directly.
-
-      // In other words, when we register a module that begins with '_' like
-      // '_Foo', register an alias 'Foo' -> '_Foo', but only enable the alias
-      // when the module is being resolved as a dependency of another module
-      // within the kernel. This means when we try to do a
-      // kernel.resolve( 'Foo' ), we get a ServiceNotFoundError, but if we have
-      // a service 'Bar' that depends on 'Foo', the resolution works.
-
-      if ( /^_/.test( shortName ) ) {
-        let segs = segments.slice();
-        segs.pop();
-        segs.push( shortName.substr( 1 ) );
-        let preferredName = namespace + segs.join( '/' );
-        this._kernel.redirects.push({
-          redirect( name, namedNode ) {
-            if ( namedNode && namedNode.isChildNode && name === preferredName ) {
-              return fullName;
-            }
-          }
-        });
-      }
-
-      this._modules.push( fullName );
     }
   }
 

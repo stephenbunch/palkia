@@ -21,7 +21,9 @@ gulp.task( 'test:node', function() {
 });
 
 gulp.task( 'test:browser', function() {
-  return arceus.test.karmaAsync( 'test/**/*.spec.js' );
+  return arceus.test.karmaAsync( 'test/**/*.spec.js', {
+    browsers: [ 'PhantomJS' ]
+  });
 });
 
 gulp.task( 'test', [ 'test:node', 'test:browser' ] );

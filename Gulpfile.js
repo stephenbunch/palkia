@@ -38,6 +38,18 @@ gulp.task( 'watch', function() {
   });
 });
 
+gulp.task( 'bundle', function() {
+  return arceus.js.bundle({
+    entry: 'src/common/index.js',
+    outfile: 'bundle/dialga.js',
+    config: {
+      browserify: {
+        standalone: 'Dialga'
+      }
+    }
+  });
+});
+
 gulp.task( 'default', function() {
-  return arceus.util.gulpAsync( gulp, 'clean', 'make' );
+  return arceus.util.gulpAsync( gulp, 'clean', 'make', 'bundle' );
 });

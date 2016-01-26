@@ -32,6 +32,10 @@ export default class Bundle {
     this._kernel.register( name, value );
   }
 
+  registerLazy( name, value ) {
+    this._kernel.registerLazy( name, value );
+  }
+
   registerFactory( name, factory ) {
     this._kernel.registerFactory( name, factory );
   }

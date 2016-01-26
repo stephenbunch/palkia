@@ -210,6 +210,10 @@ export default class Kernel {
     this.registerFactory( name, () => value );
   }
 
+  registerLazy( name, value ) {
+    this.registerAsyncFactoryAsSingleton( name, () => value );
+  }
+
   /**
    * Unregisters a name from the kernel.
    * @param {String} name

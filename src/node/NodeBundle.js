@@ -5,7 +5,7 @@ export default class NodeBundle extends Bundle {
     var glob = require( 'glob' );
     var path = require( 'path' );
     dirname = path.resolve( dirname );
-    var files = glob.sync( '**/*.*', {
+    var files = glob.sync( '**/*.+(json|js|jsx)', {
       cwd: dirname
     });
     var modules = {};

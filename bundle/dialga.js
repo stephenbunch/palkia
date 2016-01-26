@@ -80,6 +80,11 @@ var Bundle = (function () {
       this._kernel.register(name, value);
     }
   }, {
+    key: 'registerLazy',
+    value: function registerLazy(name, value) {
+      this._kernel.registerLazy(name, value);
+    }
+  }, {
     key: 'registerFactory',
     value: function registerFactory(name, factory) {
       this._kernel.registerFactory(name, factory);
@@ -823,6 +828,13 @@ var Kernel = (function () {
     key: 'register',
     value: function register(name, value) {
       this.registerFactory(name, function () {
+        return value;
+      });
+    }
+  }, {
+    key: 'registerLazy',
+    value: function registerLazy(name, value) {
+      this.registerAsyncFactoryAsSingleton(name, function () {
         return value;
       });
     }
@@ -2076,4 +2088,4 @@ exports['default'] = function (target) {
 module.exports = exports['default'];
 },{}]},{},[14])(14)
 });
-//# sourceMappingURL=dialga.js.map?10d589f7f16344b4b3bb2ab9ae11e006b2018524
+//# sourceMappingURL=dialga.js.map?a3ad173f421da77b140dd6d6c9fcf240abe4488b

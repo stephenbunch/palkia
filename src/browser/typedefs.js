@@ -8,7 +8,7 @@
 
 /**
  * @typedef {Object} StyleParams
- * @property {MatchParams} match
+ * @property {MatchParams|undefined} match
  * @property {String|Function} url
  * @property {Number|undefined} order
  */

@@ -1,4 +1,4 @@
-import { combinePaths } from './util';
+import { combinePaths } from '../common/util';
 
 export default class CommonJsResolver {
   /**

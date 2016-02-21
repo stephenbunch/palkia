@@ -1,5 +1,3 @@
-import AmdResolver from './AmdResolver';
-import CommonJsResolver from './CommonJsResolver';
 import LazyResolver from './LazyResolver';
 import Linker from './Linker';
 import OptionalResolver from './OptionalResolver';

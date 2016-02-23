@@ -25,8 +25,7 @@ export default class WebBundle extends Bundle {
    * @returns {Promise}
    */
   async loadFontAsync( font ) {
-    var webFont = await this.resolveAsync( 'webfont' );
-    var webFont = window.WebFont;
+    var webFont = ( await this.resolveAsync( 'webfont?' ) ) || window.WebFont;
     if ( !webFont ) {
       webFont = await this.loadScriptAsync({
         url: 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js',

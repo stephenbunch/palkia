@@ -1,43 +1,4 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Dialga = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var AmdResolver = (function () {
-  function AmdResolver(requireContext) {
-    _classCallCheck(this, AmdResolver);
-
-    this.requireContext = requireContext;
-  }
-
-  /**
-   * @param {String} name
-   */
-
-  _createClass(AmdResolver, [{
-    key: "resolveAsync",
-    value: function resolveAsync(name) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        _this.requireContext([name], resolve, reject);
-      });
-    }
-  }]);
-
-  return AmdResolver;
-})();
-
-exports["default"] = AmdResolver;
-;
-module.exports = exports["default"];
-},{}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -478,48 +439,7 @@ var Bundle = (function () {
 exports['default'] = Bundle;
 ;
 module.exports = exports['default'];
-},{"./Kernel":6,"./util/arrayFromTarget":15}],3:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _util = require('./util');
-
-var CommonJsResolver = (function () {
-  /**
-   * @param {String} name
-   */
-
-  function CommonJsResolver(baseDir) {
-    _classCallCheck(this, CommonJsResolver);
-
-    this.baseDir = baseDir;
-  }
-
-  /**
-   * @param {String} name
-   */
-
-  _createClass(CommonJsResolver, [{
-    key: 'resolve',
-    value: function resolve(name) {
-      return require((0, _util.combinePaths)(this.baseDir, name));
-    }
-  }]);
-
-  return CommonJsResolver;
-})();
-
-exports['default'] = CommonJsResolver;
-;
-module.exports = exports['default'];
-},{"./util":18}],4:[function(require,module,exports){
+},{"./Kernel":4,"./util/arrayFromTarget":13}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -565,7 +485,7 @@ function Component(recipe) {
 exports["default"] = Component;
 ;
 module.exports = exports["default"];
-},{}],5:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -595,7 +515,7 @@ var InvalidOperationError = (function (_Error) {
 exports['default'] = InvalidOperationError;
 ;
 module.exports = exports['default'];
-},{}],6:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -607,14 +527,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _AmdResolver = require('./AmdResolver');
-
-var _AmdResolver2 = _interopRequireDefault(_AmdResolver);
-
-var _CommonJsResolver = require('./CommonJsResolver');
-
-var _CommonJsResolver2 = _interopRequireDefault(_CommonJsResolver);
 
 var _LazyResolver = require('./LazyResolver');
 
@@ -1166,7 +1078,7 @@ var Kernel = (function () {
 exports['default'] = Kernel;
 ;
 module.exports = exports['default'];
-},{"./AmdResolver":1,"./CommonJsResolver":3,"./LazyResolver":7,"./Linker":8,"./OptionalLocalResolver":9,"./OptionalResolver":10,"./Recipe":11,"./Registry":12,"./util":18}],7:[function(require,module,exports){
+},{"./LazyResolver":5,"./Linker":6,"./OptionalLocalResolver":7,"./OptionalResolver":8,"./Recipe":9,"./Registry":10,"./util":16}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1239,7 +1151,7 @@ var LazyResolver = (function () {
 exports["default"] = LazyResolver;
 ;
 module.exports = exports["default"];
-},{}],8:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1454,7 +1366,7 @@ var Linker = (function () {
 
 exports['default'] = Linker;
 module.exports = exports['default'];
-},{"./Component":4,"./InvalidOperationError":5,"./Recipe":11,"./util":18}],9:[function(require,module,exports){
+},{"./Component":2,"./InvalidOperationError":3,"./Recipe":9,"./util":16}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1494,7 +1406,7 @@ var OptionalLocalResolver = (function () {
 exports["default"] = OptionalLocalResolver;
 ;
 module.exports = exports["default"];
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1555,7 +1467,7 @@ var OptionalResolver = (function () {
 exports["default"] = OptionalResolver;
 ;
 module.exports = exports["default"];
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1610,7 +1522,7 @@ var Recipe = (function () {
 exports["default"] = Recipe;
 ;
 module.exports = exports["default"];
-},{}],12:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1819,7 +1731,7 @@ var Registry = (function () {
 exports['default'] = Registry;
 ;
 module.exports = exports['default'];
-},{"./InvalidOperationError":5,"./Recipe":11,"./ServiceNotFoundError":13,"./util":18}],13:[function(require,module,exports){
+},{"./InvalidOperationError":3,"./Recipe":9,"./ServiceNotFoundError":11,"./util":16}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1849,7 +1761,7 @@ var ServiceNotFoundError = (function (_Error) {
 exports['default'] = ServiceNotFoundError;
 ;
 module.exports = exports['default'];
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1858,17 +1770,9 @@ Object.defineProperty(exports, '__esModule', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var _AmdResolver = require('./AmdResolver');
-
-var _AmdResolver2 = _interopRequireDefault(_AmdResolver);
-
 var _Bundle = require('./Bundle');
 
 var _Bundle2 = _interopRequireDefault(_Bundle);
-
-var _CommonJsResolver = require('./CommonJsResolver');
-
-var _CommonJsResolver2 = _interopRequireDefault(_CommonJsResolver);
 
 var _InvalidOperationError = require('./InvalidOperationError');
 
@@ -1887,16 +1791,14 @@ var _ServiceNotFoundError = require('./ServiceNotFoundError');
 var _ServiceNotFoundError2 = _interopRequireDefault(_ServiceNotFoundError);
 
 exports['default'] = {
-  AmdResolver: _AmdResolver2['default'],
   Bundle: _Bundle2['default'],
-  CommonJsResolver: _CommonJsResolver2['default'],
   InvalidOperationError: _InvalidOperationError2['default'],
   Kernel: _Kernel2['default'],
   LazyResolver: _LazyResolver2['default'],
   ServiceNotFoundError: _ServiceNotFoundError2['default']
 };
 module.exports = exports['default'];
-},{"./AmdResolver":1,"./Bundle":2,"./CommonJsResolver":3,"./InvalidOperationError":5,"./Kernel":6,"./LazyResolver":7,"./ServiceNotFoundError":13}],15:[function(require,module,exports){
+},{"./Bundle":1,"./InvalidOperationError":3,"./Kernel":4,"./LazyResolver":5,"./ServiceNotFoundError":11}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1916,7 +1818,7 @@ exports['default'] = function (target) {
 
 ;
 module.exports = exports['default'];
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * Safely combines multiple path segments.
  * @param {...String} paths
@@ -1940,7 +1842,7 @@ exports['default'] = function () {
 
 ;
 module.exports = exports['default'];
-},{}],17:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * @param {Array} items
  * @returns {Array}
@@ -1962,7 +1864,7 @@ exports["default"] = function (items) {
 
 ;
 module.exports = exports["default"];
-},{}],18:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -2004,7 +1906,7 @@ exports['default'] = {
   validateTarget: _validateTarget2['default']
 };
 module.exports = exports['default'];
-},{"./arrayFromTarget":15,"./combinePaths":16,"./distinct":17,"./matchFromPattern":19,"./recipeFromTarget":20,"./validateTarget":21}],19:[function(require,module,exports){
+},{"./arrayFromTarget":13,"./combinePaths":14,"./distinct":15,"./matchFromPattern":17,"./recipeFromTarget":18,"./validateTarget":19}],17:[function(require,module,exports){
 /**
  * @param {Pattern} pattern
  * @returns {Function}
@@ -2031,7 +1933,7 @@ exports['default'] = function (pattern) {
 
 ;
 module.exports = exports['default'];
-},{}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -2063,7 +1965,7 @@ exports['default'] = function (target) {
 
 ;
 module.exports = exports['default'];
-},{"../Recipe":11,"./arrayFromTarget":15}],21:[function(require,module,exports){
+},{"../Recipe":9,"./arrayFromTarget":13}],19:[function(require,module,exports){
 /**
  * @param {Target} target
  */
@@ -2086,6 +1988,6 @@ exports['default'] = function (target) {
 
 ;
 module.exports = exports['default'];
-},{}]},{},[14])(14)
+},{}]},{},[12])(12)
 });
-//# sourceMappingURL=dialga.js.map?a3ad173f421da77b140dd6d6c9fcf240abe4488b
+//# sourceMappingURL=dialga.js.map?4188ab0d11361b68ac93b03079e6c53c59cc6bdb

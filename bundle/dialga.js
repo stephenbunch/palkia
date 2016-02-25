@@ -103,41 +103,44 @@ var Bundle = (function () {
           var _ret2 = (function () {
             // Skip ignored paths.
             var skip = false;
-            _iteratorNormalCompletion = true;
-            _didIteratorError = false;
-            _iteratorError = undefined;
+            if (ignore instanceof RegExp) {
+              skip = ignore.test(key);
+            } else {
+              _iteratorNormalCompletion = true;
+              _didIteratorError = false;
+              _iteratorError = undefined;
 
-            try {
-              for (_iterator = ignore[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var path = _step.value;
-
-                if (/\/$/.test(path)) {
-                  if (key.startsWith(path)) {
-                    skip = true;
-                    break;
-                  }
-                } else {
-                  if (key === path) {
-                    skip = true;
-                    break;
-                  }
-                }
-              }
-            } catch (err) {
-              _didIteratorError = true;
-              _iteratorError = err;
-            } finally {
               try {
-                if (!_iteratorNormalCompletion && _iterator['return']) {
-                  _iterator['return']();
+                for (_iterator = ignore[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                  var path = _step.value;
+
+                  if (/\/$/.test(path)) {
+                    if (key.startsWith(path)) {
+                      skip = true;
+                      break;
+                    }
+                  } else {
+                    if (key === path) {
+                      skip = true;
+                      break;
+                    }
+                  }
                 }
+              } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
               } finally {
-                if (_didIteratorError) {
-                  throw _iteratorError;
+                try {
+                  if (!_iteratorNormalCompletion && _iterator['return']) {
+                    _iterator['return']();
+                  }
+                } finally {
+                  if (_didIteratorError) {
+                    throw _iteratorError;
+                  }
                 }
               }
             }
-
             if (skip) {
               return {
                 v: 'continue'
@@ -1990,4 +1993,4 @@ exports['default'] = function (target) {
 module.exports = exports['default'];
 },{}]},{},[12])(12)
 });
-//# sourceMappingURL=dialga.js.map?4188ab0d11361b68ac93b03079e6c53c59cc6bdb
+//# sourceMappingURL=dialga.js.map?15ee2666ea718f2f5260fde218346452cd4e8901

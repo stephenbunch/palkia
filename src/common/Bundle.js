@@ -78,16 +78,20 @@ export default class Bundle {
       try {
         // Skip ignored paths.
         let skip = false;
-        for ( let path of ignore ) {
-          if ( /\/$/.test( path ) ) {
-            if ( key.startsWith( path ) ) {
-              skip = true;
-              break;
-            }
-          } else {
-            if ( key === path ) {
-              skip = true;
-              break;
+        if ( ignore instanceof RegExp ) {
+          skip = ignore.test( key );
+        } else {
+          for ( let path of ignore ) {
+            if ( /\/$/.test( path ) ) {
+              if ( key.startsWith( path ) ) {
+                skip = true;
+                break;
+              }
+            } else {
+              if ( key === path ) {
+                skip = true;
+                break;
+              }
             }
           }
         }

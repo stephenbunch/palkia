@@ -1,6 +1,14 @@
 import Bundle from '../common/Bundle';
 
 export default class NodeBundle extends Bundle {
+  static create(Bundle, deps) {
+    let bundle = new NodeBundle();
+    return bundle.invoke(Bundle, {
+      NodeBundle,
+      ...deps
+    });
+  }
+
   registerDirectory( dirname, options ) {
     var glob = require( 'glob' );
     var path = require( 'path' );

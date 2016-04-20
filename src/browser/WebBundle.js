@@ -4,6 +4,16 @@ import loadScriptAsync from './util/loadScriptAsync';
 import loadStyleAsync from './util/loadStyleAsync';
 
 export default class WebBundle extends Bundle {
+  static create(Bundle, deps) {
+    let bundle = new WebBundle();
+    return bundle.invoke(Bundle, deps);
+  }
+
+  static createAsync(Bundle, deps) {
+    let bundle = new WebBundle();
+    return bundle.invokeAsync(Bundle, deps);
+  }
+
   /**
    * @param {ScriptParams} script
    * @returns {Promise.<*>}

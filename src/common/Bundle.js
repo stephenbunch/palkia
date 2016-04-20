@@ -192,6 +192,42 @@ export default class Bundle {
   }
 
   /**
+   * @param {String} fromNamespace
+   * @param {function(): Bundle} toBundleFactory
+   * @param {String} [toNamespace=""]
+   */
+  registerLinkFactory( fromNamespace, toBundleFactory, toNamespace = '' ) {
+    return this._registerLinkFactory( fromNamespace, toBundleFactory, toNamespace, false );
+  }
+
+  /**
+   * @param {String} fromNamespace
+   * @param {function(): Bundle} toBundleFactory
+   * @param {String} [toNamespace=""]
+   */
+  registerInternalLinkFactory( fromNamespace, toBundleFactory, toNamespace = '' ) {
+    return this._registerLinkFactory( fromNamespace, toBundleFactory, toNamespace, true );
+  }
+
+  /**
+   * @param {String} fromNamespace
+   * @param {function(): Promise.<Bundle>} toBundleAsyncFactory
+   * @param {String} [toNamespace=""]
+   */
+  registerAsyncLinkFactory( fromNamespace, toBundleAsyncFactory, toNamespace = '' ) {
+    this._registerAsyncLinkFactory( fromNamespace, toBundleAsyncFactory, toNamespace, false );
+  }
+
+  /**
+   * @param {String} fromNamespace
+   * @param {function(): Promise.<Bundle>} toBundleAsyncFactory
+   * @param {String} [toNamespace=""]
+   */
+  registerInternalAsyncLinkFactory( fromNamespace, toBundleAsyncFactory, toNamespace = '' ) {
+    this._registerAsyncLinkFactory( fromNamespace, toBundleAsyncFactory, toNamespace, true );
+  }
+
+  /**
    * @param {String} name
    * @param {Bundle} toBundle
    * @param {String} [toName]
@@ -250,6 +286,65 @@ export default class Bundle {
       resolveAsync: async ( name ) => {
         if ( name.startsWith( fromNamespace ) ) {
           return toBundle._kernel.factoryForAsync(
+            toNamespace +
+            name.substr( fromNamespace.length )
+          );
+        }
+      }
+    }, isInternal );
+  }
+
+  /**
+   * @param {String} fromNamespace
+   * @param {function(): Bundle} toBundleFactory
+   * @param {String} toNamespace
+   * @param {Boolean} isInternal
+   */
+  _registerLinkFactory( fromNamespace, toBundleFactory, toNamespace, isInternal ) {
+    let bundle;
+    this.registerResolver({
+      resolve: ( name ) => {
+        if ( name.startsWith( fromNamespace ) ) {
+          if (!bundle) {
+            bundle = toBundleFactory();
+          }
+          return bundle._kernel.factoryFor(
+            toNamespace +
+            name.substr( fromNamespace.length )
+          );
+        }
+      }
+    }, isInternal );
+    this.registerAsyncResolver({
+      resolveAsync: async ( name ) => {
+        if ( name.startsWith( fromNamespace ) ) {
+          if (!bundle) {
+            bundle = toBundleFactory();
+          }
+          return bundle._kernel.factoryForAsync(
+            toNamespace +
+            name.substr( fromNamespace.length )
+          );
+        }
+      }
+    }, isInternal );
+  }
+
+  /**
+   * @param {String} fromNamespace
+   * @param {function(): Promise.<Bundle>} toBundleAsyncFactory
+   * @param {String} toNamespace
+   * @param {Boolean} isInternal
+   */
+  _registerAsyncLinkFactory( fromNamespace, toBundleAsyncFactory, toNamespace, isInternal ) {
+    let bundle;
+    this.registerAsyncResolver({
+      resolveAsync: async ( name ) => {
+        if ( name.startsWith( fromNamespace ) ) {
+          if (!bundle) {
+            bundle = await toBundleAsyncFactory();
+          }
+          return bundle._kernel.factoryForAsync(
             toNamespace +
             name.substr( fromNamespace.length )
           );

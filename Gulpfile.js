@@ -40,7 +40,7 @@ gulp.task( 'watch', function() {
 
 gulp.task( 'bundle', function() {
   return arceus.js.bundle({
-    entry: 'src/common/index.js',
+    entry: 'src/browser/index.js',
     outfile: 'bundle/dialga.js',
     config: {
       browserify: {

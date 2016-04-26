@@ -1,6 +1,6 @@
 {
   "name": "dialga",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Dependency injection library.",
   "main": "dist/node",
   "scripts": {
@@ -16,14 +16,13 @@
     "url": "https://github.com/stephenbunch/dialga/issues"
   },
   "devDependencies": {
-    "arceus": "^0.3.11",
-    "babel": "^5.8.23",
-    "gulp": "^3.8.11"
+    "arceus": "^0.5.0",
+    "babel-polyfill": "^6.7.4",
+    "gulp": "^3.9.1"
   },
   "dependencies": {
     "classlist-polyfill": "^1.0.2",
-    "glob": "^5.0.14",
-    "lodash.assign": "^3.2.0",
-    "scriptjs": "^2.5.7"
+    "glob": "^7.0.3",
+    "scriptjs": "^2.5.8"
   }
 }

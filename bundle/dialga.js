@@ -240,1280 +240,6 @@ if ("document" in window.self) {
 }
 
 },{}],2:[function(require,module,exports){
-/**
- * lodash 3.2.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var baseAssign = require('lodash._baseassign'),
-    createAssigner = require('lodash._createassigner'),
-    keys = require('lodash.keys');
-
-/**
- * A specialized version of `_.assign` for customizing assigned values without
- * support for argument juggling, multiple sources, and `this` binding `customizer`
- * functions.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @param {Function} customizer The function to customize assigned values.
- * @returns {Object} Returns `object`.
- */
-function assignWith(object, source, customizer) {
-  var index = -1,
-      props = keys(source),
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index],
-        value = object[key],
-        result = customizer(value, source[key], key, object, source);
-
-    if ((result === result ? (result !== value) : (value === value)) ||
-        (value === undefined && !(key in object))) {
-      object[key] = result;
-    }
-  }
-  return object;
-}
-
-/**
- * Assigns own enumerable properties of source object(s) to the destination
- * object. Subsequent sources overwrite property assignments of previous sources.
- * If `customizer` is provided it is invoked to produce the assigned values.
- * The `customizer` is bound to `thisArg` and invoked with five arguments:
- * (objectValue, sourceValue, key, object, source).
- *
- * **Note:** This method mutates `object` and is based on
- * [`Object.assign`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign).
- *
- * @static
- * @memberOf _
- * @alias extend
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @param {Function} [customizer] The function to customize assigned values.
- * @param {*} [thisArg] The `this` binding of `customizer`.
- * @returns {Object} Returns `object`.
- * @example
- *
- * _.assign({ 'user': 'barney' }, { 'age': 40 }, { 'user': 'fred' });
- * // => { 'user': 'fred', 'age': 40 }
- *
- * // using a customizer callback
- * var defaults = _.partialRight(_.assign, function(value, other) {
- *   return _.isUndefined(value) ? other : value;
- * });
- *
- * defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
- * // => { 'user': 'barney', 'age': 36 }
- */
-var assign = createAssigner(function(object, source, customizer) {
-  return customizer
-    ? assignWith(object, source, customizer)
-    : baseAssign(object, source);
-});
-
-module.exports = assign;
-
-},{"lodash._baseassign":3,"lodash._createassigner":5,"lodash.keys":9}],3:[function(require,module,exports){
-/**
- * lodash 3.2.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var baseCopy = require('lodash._basecopy'),
-    keys = require('lodash.keys');
-
-/**
- * The base implementation of `_.assign` without support for argument juggling,
- * multiple sources, and `customizer` functions.
- *
- * @private
- * @param {Object} object The destination object.
- * @param {Object} source The source object.
- * @returns {Object} Returns `object`.
- */
-function baseAssign(object, source) {
-  return source == null
-    ? object
-    : baseCopy(source, keys(source), object);
-}
-
-module.exports = baseAssign;
-
-},{"lodash._basecopy":4,"lodash.keys":9}],4:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * Copies properties of `source` to `object`.
- *
- * @private
- * @param {Object} source The object to copy properties from.
- * @param {Array} props The property names to copy.
- * @param {Object} [object={}] The object to copy properties to.
- * @returns {Object} Returns `object`.
- */
-function baseCopy(source, props, object) {
-  object || (object = {});
-
-  var index = -1,
-      length = props.length;
-
-  while (++index < length) {
-    var key = props[index];
-    object[key] = source[key];
-  }
-  return object;
-}
-
-module.exports = baseCopy;
-
-},{}],5:[function(require,module,exports){
-/**
- * lodash 3.1.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var bindCallback = require('lodash._bindcallback'),
-    isIterateeCall = require('lodash._isiterateecall'),
-    restParam = require('lodash.restparam');
-
-/**
- * Creates a function that assigns properties of source object(s) to a given
- * destination object.
- *
- * **Note:** This function is used to create `_.assign`, `_.defaults`, and `_.merge`.
- *
- * @private
- * @param {Function} assigner The function to assign values.
- * @returns {Function} Returns the new assigner function.
- */
-function createAssigner(assigner) {
-  return restParam(function(object, sources) {
-    var index = -1,
-        length = object == null ? 0 : sources.length,
-        customizer = length > 2 ? sources[length - 2] : undefined,
-        guard = length > 2 ? sources[2] : undefined,
-        thisArg = length > 1 ? sources[length - 1] : undefined;
-
-    if (typeof customizer == 'function') {
-      customizer = bindCallback(customizer, thisArg, 5);
-      length -= 2;
-    } else {
-      customizer = typeof thisArg == 'function' ? thisArg : undefined;
-      length -= (customizer ? 1 : 0);
-    }
-    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
-      customizer = length < 3 ? undefined : customizer;
-      length = 1;
-    }
-    while (++index < length) {
-      var source = sources[index];
-      if (source) {
-        assigner(object, source, customizer);
-      }
-    }
-    return object;
-  });
-}
-
-module.exports = createAssigner;
-
-},{"lodash._bindcallback":6,"lodash._isiterateecall":7,"lodash.restparam":8}],6:[function(require,module,exports){
-/**
- * lodash 3.0.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/**
- * A specialized version of `baseCallback` which only supports `this` binding
- * and specifying the number of arguments to provide to `func`.
- *
- * @private
- * @param {Function} func The function to bind.
- * @param {*} thisArg The `this` binding of `func`.
- * @param {number} [argCount] The number of arguments to provide to `func`.
- * @returns {Function} Returns the callback.
- */
-function bindCallback(func, thisArg, argCount) {
-  if (typeof func != 'function') {
-    return identity;
-  }
-  if (thisArg === undefined) {
-    return func;
-  }
-  switch (argCount) {
-    case 1: return function(value) {
-      return func.call(thisArg, value);
-    };
-    case 3: return function(value, index, collection) {
-      return func.call(thisArg, value, index, collection);
-    };
-    case 4: return function(accumulator, value, index, collection) {
-      return func.call(thisArg, accumulator, value, index, collection);
-    };
-    case 5: return function(value, other, key, object, source) {
-      return func.call(thisArg, value, other, key, object, source);
-    };
-  }
-  return function() {
-    return func.apply(thisArg, arguments);
-  };
-}
-
-/**
- * This method returns the first argument provided to it.
- *
- * @static
- * @memberOf _
- * @category Utility
- * @param {*} value Any value.
- * @returns {*} Returns `value`.
- * @example
- *
- * var object = { 'user': 'fred' };
- *
- * _.identity(object) === object;
- * // => true
- */
-function identity(value) {
-  return value;
-}
-
-module.exports = bindCallback;
-
-},{}],7:[function(require,module,exports){
-/**
- * lodash 3.0.9 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^\d+$/;
-
-/**
- * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return value > -1 && value % 1 == 0 && value < length;
-}
-
-/**
- * Checks if the provided arguments are from an iteratee call.
- *
- * @private
- * @param {*} value The potential iteratee value argument.
- * @param {*} index The potential iteratee index or key argument.
- * @param {*} object The potential iteratee object argument.
- * @returns {boolean} Returns `true` if the arguments are from an iteratee call, else `false`.
- */
-function isIterateeCall(value, index, object) {
-  if (!isObject(object)) {
-    return false;
-  }
-  var type = typeof index;
-  if (type == 'number'
-      ? (isArrayLike(object) && isIndex(index, object.length))
-      : (type == 'string' && index in object)) {
-    var other = object[index];
-    return value === value ? (value === other) : (other !== other);
-  }
-  return false;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-module.exports = isIterateeCall;
-
-},{}],8:[function(require,module,exports){
-/**
- * lodash 3.6.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used as the `TypeError` message for "Functions" methods. */
-var FUNC_ERROR_TEXT = 'Expected a function';
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max;
-
-/**
- * Creates a function that invokes `func` with the `this` binding of the
- * created function and arguments from `start` and beyond provided as an array.
- *
- * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
- *
- * @static
- * @memberOf _
- * @category Function
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
- * @example
- *
- * var say = _.restParam(function(what, names) {
- *   return what + ' ' + _.initial(names).join(', ') +
- *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
- * });
- *
- * say('hello', 'fred', 'barney', 'pebbles');
- * // => 'hello fred, barney, & pebbles'
- */
-function restParam(func, start) {
-  if (typeof func != 'function') {
-    throw new TypeError(FUNC_ERROR_TEXT);
-  }
-  start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
-  return function() {
-    var args = arguments,
-        index = -1,
-        length = nativeMax(args.length - start, 0),
-        rest = Array(length);
-
-    while (++index < length) {
-      rest[index] = args[start + index];
-    }
-    switch (start) {
-      case 0: return func.call(this, rest);
-      case 1: return func.call(this, args[0], rest);
-      case 2: return func.call(this, args[0], args[1], rest);
-    }
-    var otherArgs = Array(start + 1);
-    index = -1;
-    while (++index < start) {
-      otherArgs[index] = args[index];
-    }
-    otherArgs[start] = rest;
-    return func.apply(this, otherArgs);
-  };
-}
-
-module.exports = restParam;
-
-},{}],9:[function(require,module,exports){
-/**
- * lodash 3.1.2 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-var getNative = require('lodash._getnative'),
-    isArguments = require('lodash.isarguments'),
-    isArray = require('lodash.isarray');
-
-/** Used to detect unsigned integer values. */
-var reIsUint = /^\d+$/;
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeKeys = getNative(Object, 'keys');
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is array-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- */
-function isArrayLike(value) {
-  return value != null && isLength(getLength(value));
-}
-
-/**
- * Checks if `value` is a valid array-like index.
- *
- * @private
- * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
- */
-function isIndex(value, length) {
-  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
-  length = length == null ? MAX_SAFE_INTEGER : length;
-  return value > -1 && value % 1 == 0 && value < length;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * A fallback implementation of `Object.keys` which creates an array of the
- * own enumerable property names of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- */
-function shimKeys(object) {
-  var props = keysIn(object),
-      propsLength = props.length,
-      length = propsLength && object.length;
-
-  var allowIndexes = !!length && isLength(length) &&
-    (isArray(object) || isArguments(object));
-
-  var index = -1,
-      result = [];
-
-  while (++index < propsLength) {
-    var key = props[index];
-    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Creates an array of the own enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects. See the
- * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
- * for more details.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keys(new Foo);
- * // => ['a', 'b'] (iteration order is not guaranteed)
- *
- * _.keys('hi');
- * // => ['0', '1']
- */
-var keys = !nativeKeys ? shimKeys : function(object) {
-  var Ctor = object == null ? undefined : object.constructor;
-  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-      (typeof object != 'function' && isArrayLike(object))) {
-    return shimKeys(object);
-  }
-  return isObject(object) ? nativeKeys(object) : [];
-};
-
-/**
- * Creates an array of the own and inherited enumerable property names of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.keysIn(new Foo);
- * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
- */
-function keysIn(object) {
-  if (object == null) {
-    return [];
-  }
-  if (!isObject(object)) {
-    object = Object(object);
-  }
-  var length = object.length;
-  length = (length && isLength(length) &&
-    (isArray(object) || isArguments(object)) && length) || 0;
-
-  var Ctor = object.constructor,
-      index = -1,
-      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
-      result = Array(length),
-      skipIndexes = length > 0;
-
-  while (++index < length) {
-    result[index] = (index + '');
-  }
-  for (var key in object) {
-    if (!(skipIndexes && isIndex(key, length)) &&
-        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-      result.push(key);
-    }
-  }
-  return result;
-}
-
-module.exports = keys;
-
-},{"lodash._getnative":10,"lodash.isarguments":11,"lodash.isarray":12}],10:[function(require,module,exports){
-/**
- * lodash 3.9.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** `Object#toString` result references. */
-var funcTag = '[object Function]';
-
-/** Used to detect host constructors (Safari > 5). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var fnToString = Function.prototype.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = object == null ? undefined : object[key];
-  return isNative(value) ? value : undefined;
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 equivalents which return 'object' for typed array constructors.
-  return isObject(value) && objToString.call(value) == funcTag;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is a native function.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
- * @example
- *
- * _.isNative(Array.prototype.push);
- * // => true
- *
- * _.isNative(_);
- * // => false
- */
-function isNative(value) {
-  if (value == null) {
-    return false;
-  }
-  if (isFunction(value)) {
-    return reIsNative.test(fnToString.call(value));
-  }
-  return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-module.exports = getNative;
-
-},{}],11:[function(require,module,exports){
-/**
- * lodash 3.0.7 (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/** `Object#toString` result references. */
-var argsTag = '[object Arguments]',
-    funcTag = '[object Function]',
-    genTag = '[object GeneratorFunction]';
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objectToString = objectProto.toString;
-
-/** Built-in value references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-/**
- * The base implementation of `_.property` without support for deep paths.
- *
- * @private
- * @param {string} key The key of the property to get.
- * @returns {Function} Returns the new function.
- */
-function baseProperty(key) {
-  return function(object) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Gets the "length" property value of `object`.
- *
- * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
- * that affects Safari on at least iOS 8.1-8.3 ARM64.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {*} Returns the "length" value.
- */
-var getLength = baseProperty('length');
-
-/**
- * Checks if `value` is likely an `arguments` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isArguments(function() { return arguments; }());
- * // => true
- *
- * _.isArguments([1, 2, 3]);
- * // => false
- */
-function isArguments(value) {
-  // Safari 8.1 incorrectly makes `arguments.callee` enumerable in strict mode.
-  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
-    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
-}
-
-/**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
- * @example
- *
- * _.isArrayLike([1, 2, 3]);
- * // => true
- *
- * _.isArrayLike(document.body.children);
- * // => true
- *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
- */
-function isArrayLike(value) {
-  return value != null &&
-    !(typeof value == 'function' && isFunction(value)) && isLength(getLength(value));
-}
-
-/**
- * This method is like `_.isArrayLike` except that it also checks if `value`
- * is an object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array-like object, else `false`.
- * @example
- *
- * _.isArrayLikeObject([1, 2, 3]);
- * // => true
- *
- * _.isArrayLikeObject(document.body.children);
- * // => true
- *
- * _.isArrayLikeObject('abc');
- * // => false
- *
- * _.isArrayLikeObject(_.noop);
- * // => false
- */
-function isArrayLikeObject(value) {
-  return isObjectLike(value) && isArrayLike(value);
-}
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in Safari 8 which returns 'object' for typed array constructors, and
-  // PhantomJS 1.9 which returns 'function' for `NodeList` instances.
-  var tag = isObject(value) ? objectToString.call(value) : '';
-  return tag == funcTag || tag == genTag;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is loosely based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
- */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-module.exports = isArguments;
-
-},{}],12:[function(require,module,exports){
-/**
- * lodash 3.0.4 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** `Object#toString` result references. */
-var arrayTag = '[object Array]',
-    funcTag = '[object Function]';
-
-/** Used to detect host constructors (Safari > 5). */
-var reIsHostCtor = /^\[object .+?Constructor\]$/;
-
-/**
- * Checks if `value` is object-like.
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- */
-function isObjectLike(value) {
-  return !!value && typeof value == 'object';
-}
-
-/** Used for native method references. */
-var objectProto = Object.prototype;
-
-/** Used to resolve the decompiled source of functions. */
-var fnToString = Function.prototype.toString;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
- * of values.
- */
-var objToString = objectProto.toString;
-
-/** Used to detect if a method is native. */
-var reIsNative = RegExp('^' +
-  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
-  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-);
-
-/* Native method references for those with the same name as other `lodash` methods. */
-var nativeIsArray = getNative(Array, 'isArray');
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Gets the native function at `key` of `object`.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
- */
-function getNative(object, key) {
-  var value = object == null ? undefined : object[key];
-  return isNative(value) ? value : undefined;
-}
-
-/**
- * Checks if `value` is a valid array-like length.
- *
- * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
- *
- * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- */
-function isLength(value) {
-  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-}
-
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(function() { return arguments; }());
- * // => false
- */
-var isArray = nativeIsArray || function(value) {
-  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
-};
-
-/**
- * Checks if `value` is classified as a `Function` object.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
- * @example
- *
- * _.isFunction(_);
- * // => true
- *
- * _.isFunction(/abc/);
- * // => false
- */
-function isFunction(value) {
-  // The use of `Object#toString` avoids issues with the `typeof` operator
-  // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 equivalents which return 'object' for typed array constructors.
-  return isObject(value) && objToString.call(value) == funcTag;
-}
-
-/**
- * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
- * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(1);
- * // => false
- */
-function isObject(value) {
-  // Avoid a V8 JIT bug in Chrome 19-20.
-  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-  var type = typeof value;
-  return !!value && (type == 'object' || type == 'function');
-}
-
-/**
- * Checks if `value` is a native function.
- *
- * @static
- * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
- * @example
- *
- * _.isNative(Array.prototype.push);
- * // => true
- *
- * _.isNative(_);
- * // => false
- */
-function isNative(value) {
-  if (value == null) {
-    return false;
-  }
-  if (isFunction(value)) {
-    return reIsNative.test(fnToString.call(value));
-  }
-  return isObjectLike(value) && reIsHostCtor.test(value);
-}
-
-module.exports = isArray;
-
-},{}],13:[function(require,module,exports){
 /*!
   * $script.js JS loader & dependency manager
   * https://github.com/ded/script.js
@@ -1638,18 +364,18 @@ module.exports = isArray;
   return $script
 });
 
-},{}],14:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var AmdResolver = (function () {
+var AmdResolver = function () {
   function AmdResolver(requireContext) {
     _classCallCheck(this, AmdResolver);
 
@@ -1659,6 +385,7 @@ var AmdResolver = (function () {
   /**
    * @param {String} name
    */
+
 
   _createClass(AmdResolver, [{
     key: "resolveAsync",
@@ -1672,143 +399,160 @@ var AmdResolver = (function () {
   }]);
 
   return AmdResolver;
-})();
+}();
 
-exports["default"] = AmdResolver;
+exports.default = AmdResolver;
 ;
-module.exports = exports["default"];
-},{}],15:[function(require,module,exports){
+
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = {
+exports.default = {
   uid: 0,
   pending: {}
 };
-module.exports = exports["default"];
-},{}],16:[function(require,module,exports){
+
+},{}],5:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _Bundle2 = require('../common/Bundle');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _Bundle3 = _interopRequireDefault(_Bundle2);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _loadFontAsync2 = require('./util/loadFontAsync');
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _loadFontAsync3 = _interopRequireDefault(_loadFontAsync2);
 
-var _commonBundle = require('../common/Bundle');
+var _loadScriptAsync2 = require('./util/loadScriptAsync');
 
-var _commonBundle2 = _interopRequireDefault(_commonBundle);
+var _loadScriptAsync3 = _interopRequireDefault(_loadScriptAsync2);
 
-var _utilLoadFontAsync = require('./util/loadFontAsync');
+var _loadStyleAsync2 = require('./util/loadStyleAsync');
 
-var _utilLoadFontAsync2 = _interopRequireDefault(_utilLoadFontAsync);
+var _loadStyleAsync3 = _interopRequireDefault(_loadStyleAsync2);
 
-var _utilLoadScriptAsync = require('./util/loadScriptAsync');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _utilLoadScriptAsync2 = _interopRequireDefault(_utilLoadScriptAsync);
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-var _utilLoadStyleAsync = require('./util/loadStyleAsync');
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _utilLoadStyleAsync2 = _interopRequireDefault(_utilLoadStyleAsync);
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var WebBundle = (function (_Bundle) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var WebBundle = function (_Bundle) {
   _inherits(WebBundle, _Bundle);
 
   function WebBundle() {
     _classCallCheck(this, WebBundle);
 
-    _get(Object.getPrototypeOf(WebBundle.prototype), 'constructor', this).apply(this, arguments);
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(WebBundle).apply(this, arguments));
   }
 
   _createClass(WebBundle, [{
     key: 'loadScriptAsync',
+
 
     /**
      * @param {ScriptParams} script
      * @returns {Promise.<*>}
      */
     value: function loadScriptAsync(script) {
-      return (0, _utilLoadScriptAsync2['default'])(script);
+      return (0, _loadScriptAsync3.default)(script);
     }
 
     /**
      * @param {StyleParams} style
      * @returns {Promise}
      */
+
   }, {
     key: 'loadStyleAsync',
     value: function loadStyleAsync(style) {
-      return (0, _utilLoadStyleAsync2['default'])(style);
+      return (0, _loadStyleAsync3.default)(style);
     }
 
     /**
      * @param {FontParams} font
      * @returns {Promise}
      */
+
   }, {
     key: 'loadFontAsync',
-    value: function loadFontAsync(font) {
-      var webFont;
-      return regeneratorRuntime.async(function loadFontAsync$(context$2$0) {
-        while (1) switch (context$2$0.prev = context$2$0.next) {
-          case 0:
-            context$2$0.next = 2;
-            return regeneratorRuntime.awrap(this.resolveAsync('webfont?'));
+    value: function () {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(font) {
+        var webFont;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.resolveAsync('webfont?');
 
-          case 2:
-            context$2$0.t0 = context$2$0.sent;
+              case 2:
+                _context.t0 = _context.sent;
 
-            if (context$2$0.t0) {
-              context$2$0.next = 5;
-              break;
+                if (_context.t0) {
+                  _context.next = 5;
+                  break;
+                }
+
+                _context.t0 = window.WebFont;
+
+              case 5:
+                webFont = _context.t0;
+
+                if (webFont) {
+                  _context.next = 10;
+                  break;
+                }
+
+                _context.next = 9;
+                return this.loadScriptAsync({
+                  url: 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js',
+                  get: function get() {
+                    return window.WebFont;
+                  }
+                });
+
+              case 9:
+                webFont = _context.sent;
+
+              case 10:
+                _context.next = 12;
+                return (0, _loadFontAsync3.default)(webFont, font);
+
+              case 12:
+              case 'end':
+                return _context.stop();
             }
+          }
+        }, _callee, this);
+      }));
 
-            context$2$0.t0 = window.WebFont;
+      function loadFontAsync(_x) {
+        return ref.apply(this, arguments);
+      }
 
-          case 5:
-            webFont = context$2$0.t0;
-
-            if (webFont) {
-              context$2$0.next = 10;
-              break;
-            }
-
-            context$2$0.next = 9;
-            return regeneratorRuntime.awrap(this.loadScriptAsync({
-              url: 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js',
-              get: function get() {
-                return window.WebFont;
-              }
-            }));
-
-          case 9:
-            webFont = context$2$0.sent;
-
-          case 10:
-            context$2$0.next = 12;
-            return regeneratorRuntime.awrap((0, _utilLoadFontAsync2['default'])(webFont, font));
-
-          case 12:
-          case 'end':
-            return context$2$0.stop();
-        }
-      }, null, this);
-    }
+      return loadFontAsync;
+    }()
 
     /**
      * @param {String} name
      * @param {FontParams} font
      */
+
   }, {
     key: 'registerFont',
     value: function registerFont(name, font) {
@@ -1819,6 +563,7 @@ var WebBundle = (function (_Bundle) {
      * @param {String} name
      * @param {FontParams} font
      */
+
   }, {
     key: 'registerInternalFont',
     value: function registerInternalFont(name, font) {
@@ -1829,6 +574,7 @@ var WebBundle = (function (_Bundle) {
      * @param {String} name
      * @param {ScriptParams} script
      */
+
   }, {
     key: 'registerScript',
     value: function registerScript(name, script) {
@@ -1839,6 +585,7 @@ var WebBundle = (function (_Bundle) {
      * @param {String} name
      * @param {ScriptParams} script
      */
+
   }, {
     key: 'registerInternalScript',
     value: function registerInternalScript(name, script) {
@@ -1849,6 +596,7 @@ var WebBundle = (function (_Bundle) {
      * @param {String} name
      * @param {StyleParams} style
      */
+
   }, {
     key: 'registerStyle',
     value: function registerStyle(name, style) {
@@ -1859,6 +607,7 @@ var WebBundle = (function (_Bundle) {
      * @param {String} name
      * @param {StyleParams} style
      */
+
   }, {
     key: 'registerInternalStyle',
     value: function registerInternalStyle(name, style) {
@@ -1870,6 +619,7 @@ var WebBundle = (function (_Bundle) {
      * @param {StyleParams} style
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerStyle',
     value: function _registerStyle(name, style, isInternal) {
@@ -1877,31 +627,37 @@ var WebBundle = (function (_Bundle) {
 
       var promise;
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(target) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            var _this = this;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(target) {
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              while (1) {
+                switch (_context2.prev = _context2.next) {
+                  case 0:
+                    if (!(name === target)) {
+                      _context2.next = 3;
+                      break;
+                    }
 
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!(name === target)) {
-                  context$3$0.next = 3;
-                  break;
+                    if (!promise) {
+                      promise = _this2.loadStyleAsync(style).then(function () {
+                        _this2.register(name);
+                        return function () {};
+                      });
+                    }
+                    return _context2.abrupt('return', promise);
+
+                  case 3:
+                  case 'end':
+                    return _context2.stop();
                 }
+              }
+            }, _callee2, _this2);
+          }));
 
-                if (!promise) {
-                  promise = this.loadStyleAsync(style).then(function () {
-                    _this.register(name);
-                    return function () {};
-                  });
-                }
-                return context$3$0.abrupt('return', promise);
-
-              case 3:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this2);
-        }
+          return function resolveAsync(_x2) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
 
@@ -1910,40 +666,47 @@ var WebBundle = (function (_Bundle) {
      * @param {ScriptParams} script
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerScript',
     value: function _registerScript(name, script, isInternal) {
-      var _this4 = this;
+      var _this3 = this;
 
       var promise;
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(target) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            var _this3 = this;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(target) {
+            return regeneratorRuntime.wrap(function _callee3$(_context3) {
+              while (1) {
+                switch (_context3.prev = _context3.next) {
+                  case 0:
+                    if (!(name === target)) {
+                      _context3.next = 3;
+                      break;
+                    }
 
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!(name === target)) {
-                  context$3$0.next = 3;
-                  break;
+                    if (!promise) {
+                      promise = _this3.loadScriptAsync(script).then(function (instance) {
+                        _this3.register(name, instance);
+                        return function () {
+                          return instance;
+                        };
+                      });
+                    }
+                    return _context3.abrupt('return', promise);
+
+                  case 3:
+                  case 'end':
+                    return _context3.stop();
                 }
+              }
+            }, _callee3, _this3);
+          }));
 
-                if (!promise) {
-                  promise = this.loadScriptAsync(script).then(function (instance) {
-                    _this3.register(name, instance);
-                    return function () {
-                      return instance;
-                    };
-                  });
-                }
-                return context$3$0.abrupt('return', promise);
-
-              case 3:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this4);
-        }
+          return function resolveAsync(_x3) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
 
@@ -1952,38 +715,45 @@ var WebBundle = (function (_Bundle) {
      * @param {FontParams} font
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerFont',
     value: function _registerFont(name, font, isInternal) {
-      var _this6 = this;
+      var _this4 = this;
 
       var promise;
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(target) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            var _this5 = this;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(target) {
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+              while (1) {
+                switch (_context4.prev = _context4.next) {
+                  case 0:
+                    if (!(name === target)) {
+                      _context4.next = 3;
+                      break;
+                    }
 
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!(name === target)) {
-                  context$3$0.next = 3;
-                  break;
+                    if (!promise) {
+                      promise = _this4.loadFontAsync(font).then(function () {
+                        _this4.register(name);
+                        return function () {};
+                      });
+                    }
+                    return _context4.abrupt('return', promise);
+
+                  case 3:
+                  case 'end':
+                    return _context4.stop();
                 }
+              }
+            }, _callee4, _this4);
+          }));
 
-                if (!promise) {
-                  promise = this.loadFontAsync(font).then(function () {
-                    _this5.register(name);
-                    return function () {};
-                  });
-                }
-                return context$3$0.abrupt('return', promise);
-
-              case 3:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this6);
-        }
+          return function resolveAsync(_x4) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
   }], [{
@@ -2001,55 +771,54 @@ var WebBundle = (function (_Bundle) {
   }]);
 
   return WebBundle;
-})(_commonBundle2['default']);
+}(_Bundle3.default);
 
-exports['default'] = WebBundle;
+exports.default = WebBundle;
 ;
-module.exports = exports['default'];
-},{"../common/Bundle":26,"./util/loadFontAsync":20,"./util/loadScriptAsync":21,"./util/loadStyleAsync":23}],17:[function(require,module,exports){
+
+},{"../common/Bundle":15,"./util/loadFontAsync":9,"./util/loadScriptAsync":10,"./util/loadStyleAsync":12}],6:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _lodashAssign = require('lodash.assign');
-
-var _lodashAssign2 = _interopRequireDefault(_lodashAssign);
-
-require('classlist-polyfill');
+exports.AmdResolver = exports.WebBundle = undefined;
 
 var _common = require('../common');
 
-var _common2 = _interopRequireDefault(_common);
-
-var _WebBundle = require('./WebBundle');
-
-var _WebBundle2 = _interopRequireDefault(_WebBundle);
-
-var _AmdResolver = require('./AmdResolver');
-
-var _AmdResolver2 = _interopRequireDefault(_AmdResolver);
-
-exports['default'] = (0, _lodashAssign2['default'])({}, _common2['default'], {
-  WebBundle: _WebBundle2['default'],
-  AmdResolver: _AmdResolver2['default']
+Object.keys(_common).forEach(function (key) {
+  if (key === "default") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function get() {
+      return _common[key];
+    }
+  });
 });
-module.exports = exports['default'];
-},{"../common":37,"./AmdResolver":14,"./WebBundle":16,"classlist-polyfill":1,"lodash.assign":2}],18:[function(require,module,exports){
-/**
- * @param {String} name
- * @returns {Boolean}
- */
+
+require('classlist-polyfill');
+
+var _WebBundle2 = require('./WebBundle');
+
+var _WebBundle3 = _interopRequireDefault(_WebBundle2);
+
+var _AmdResolver2 = require('./AmdResolver');
+
+var _AmdResolver3 = _interopRequireDefault(_AmdResolver2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.WebBundle = _WebBundle3.default;
+exports.AmdResolver = _AmdResolver3.default;
+
+},{"../common":26,"./AmdResolver":3,"./WebBundle":5,"classlist-polyfill":1}],7:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (name, testString) {
+exports.default = function (name, testString) {
   var elem = document.createElement('div');
   var text = document.createTextNode(testString || 'BESbswy');
   elem.appendChild(text);
@@ -2066,36 +835,34 @@ exports['default'] = function (name, testString) {
   return width1 !== width2;
 };
 
-;
-module.exports = exports['default'];
-},{}],19:[function(require,module,exports){
-/**
- * @param {String} family
- * @returns {String|null}
- */
+; /**
+   * @param {String} name
+   * @returns {Boolean}
+   */
+
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports["default"] = function (family) {
+exports.default = function (family) {
   var link = document.querySelector("link[href$=\"" + family + "\"]");
   return link && link.href;
 };
 
-;
-module.exports = exports["default"];
-},{}],20:[function(require,module,exports){
+; /**
+   * @param {String} family
+   * @returns {String|null}
+   */
+
+},{}],9:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var _fontIsLoaded = require('./fontIsLoaded');
 
@@ -2109,70 +876,81 @@ var _moveStyleToTop = require('./moveStyleToTop');
 
 var _moveStyleToTop2 = _interopRequireDefault(_moveStyleToTop);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
 /**
  * @param {WebFont} webFont
  * @param {FontParams} font
  * @returns {Promise}
  */
 
-exports['default'] = function callee$0$0(webFont, font) {
-  return regeneratorRuntime.async(function callee$0$0$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        if ((0, _fontIsLoaded2['default'])(font.name, font.testString)) {
-          context$1$0.next = 3;
-          break;
-        }
-
-        context$1$0.next = 3;
-        return regeneratorRuntime.awrap(new Promise(function (resolve) {
-          var _config;
-
-          var url;
-          var family = font.family || font.name;
-          var config = (_config = {}, _defineProperty(_config, font.provider, {
-            families: [family]
-          }), _defineProperty(_config, 'active', function active() {
-            if (!(0, _fontIsLoaded2['default'])(font.name, font.testString)) {
-              console.warn('A font was successfully loaded, but the font could not be ' + ('detected. Perhaps the font name "' + font.name + '" is wrong?'));
+exports.default = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(webFont, font) {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if ((0, _fontIsLoaded2.default)(font.name, font.testString)) {
+              _context.next = 3;
+              break;
             }
-            switch (font.provider) {
-              case 'custom':
-                (0, _moveStyleToTop2['default'])(url, font.order);
-                break;
-              case 'google':
-                var href = (0, _hrefForGoogleFont2['default'])(family.replace(/ /g, '+'));
-                if (href) {
-                  (0, _moveStyleToTop2['default'])(href, font.order);
+
+            _context.next = 3;
+            return new Promise(function (resolve) {
+              var _config;
+
+              var url;
+              var family = font.family || font.name;
+              var config = (_config = {}, _defineProperty(_config, font.provider, {
+                families: [family]
+              }), _defineProperty(_config, 'active', function active() {
+                if (!(0, _fontIsLoaded2.default)(font.name, font.testString)) {
+                  console.warn('A font was successfully loaded, but the font could not be ' + ('detected. Perhaps the font name "' + font.name + '" is wrong?'));
                 }
-                break;
-            }
-            resolve();
-          }), _config);
-          if (font.provider === 'custom') {
-            url = typeof font.url === 'function' ? font.url() : font.url;
-            config.custom.urls = [url];
-            config.custom.testStrings = _defineProperty({}, font.name, font.testString);
-          }
-          webFont.load(config);
-        }));
+                switch (font.provider) {
+                  case 'custom':
+                    (0, _moveStyleToTop2.default)(url, font.order);
+                    break;
+                  case 'google':
+                    var href = (0, _hrefForGoogleFont2.default)(family.replace(/ /g, '+'));
+                    if (href) {
+                      (0, _moveStyleToTop2.default)(href, font.order);
+                    }
+                    break;
+                }
+                resolve();
+              }), _config);
+              if (font.provider === 'custom') {
+                url = typeof font.url === 'function' ? font.url() : font.url;
+                config.custom.urls = [url];
+                config.custom.testStrings = _defineProperty({}, font.name, font.testString);
+              }
+              webFont.load(config);
+            });
 
-      case 3:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, this);
-};
+          case 3:
+          case 'end':
+            return _context.stop();
+        }
+      }
+    }, _callee, this);
+  }));
 
-module.exports = exports['default'];
-},{"./fontIsLoaded":18,"./hrefForGoogleFont":19,"./moveStyleToTop":24}],21:[function(require,module,exports){
+  return function (_x, _x2) {
+    return ref.apply(this, arguments);
+  };
+}();
+
+},{"./fontIsLoaded":7,"./hrefForGoogleFont":8,"./moveStyleToTop":13}],10:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _scriptjs = require('scriptjs');
 
@@ -2182,113 +960,121 @@ var _GLOBAL = require('../GLOBAL');
 
 var _GLOBAL2 = _interopRequireDefault(_GLOBAL);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
 /**
  * @param {ScriptParams} script
  * @returns {Promise}
  */
 
-exports['default'] = function callee$0$0(script) {
-  var instance, result;
-  return regeneratorRuntime.async(function callee$0$0$(context$1$0) {
+exports.default = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(script) {
     var _this = this;
 
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        try {
-          instance = script.get();
-        } catch (err) {}
+    var instance, result;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            try {
+              instance = script.get();
+            } catch (err) {}
 
-        if (instance) {
-          context$1$0.next = 4;
-          break;
-        }
-
-        context$1$0.next = 4;
-        return regeneratorRuntime.awrap((function callee$1$0() {
-          var url;
-          return regeneratorRuntime.async(function callee$1$0$(context$2$0) {
-            while (1) switch (context$2$0.prev = context$2$0.next) {
-              case 0:
-                url = typeof script.url === 'function' ? script.url() : script.url;
-
-                if (!_GLOBAL2['default'].pending[url]) {
-                  _GLOBAL2['default'].pending[url] = new Promise(function (resolve) {
-                    if (script.callback) {
-                      (function () {
-                        var callbackName = 'arceus_callback_' + ++_GLOBAL2['default'].uid;
-                        window[callbackName] = function () {
-                          delete window[callbackName];
-                          resolve();
-                        };
-                        (0, _scriptjs2['default'])(url + '&callback=' + callbackName);
-                      })();
-                    } else {
-                      (0, _scriptjs2['default'])(url, function () {
-                        resolve();
-                      });
-                    }
-                  });
-                }
-                context$2$0.next = 4;
-                return regeneratorRuntime.awrap(_GLOBAL2['default'].pending[url]);
-
-              case 4:
-                delete _GLOBAL2['default'].pending[url];
-                instance = script.get();
-
-                if (instance) {
-                  context$2$0.next = 8;
-                  break;
-                }
-
-                throw new Error('A script was loaded successfully from ' + url + ', but the ' + 'module returned undefined. Perhaps the \'get\' function is wrong?');
-
-              case 8:
-              case 'end':
-                return context$2$0.stop();
+            if (instance) {
+              _context2.next = 3;
+              break;
             }
-          }, null, _this);
-        })());
 
-      case 4:
-        if (!(typeof script.initAsync === 'function')) {
-          context$1$0.next = 9;
-          break;
+            return _context2.delegateYield(regeneratorRuntime.mark(function _callee() {
+              var url;
+              return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      url = typeof script.url === 'function' ? script.url() : script.url;
+
+                      if (!_GLOBAL2.default.pending[url]) {
+                        _GLOBAL2.default.pending[url] = new Promise(function (resolve) {
+                          if (script.callback) {
+                            (function () {
+                              var callbackName = 'arceus_callback_' + ++_GLOBAL2.default.uid;
+                              window[callbackName] = function () {
+                                delete window[callbackName];
+                                resolve();
+                              };
+                              (0, _scriptjs2.default)(url + '&callback=' + callbackName);
+                            })();
+                          } else {
+                            (0, _scriptjs2.default)(url, function () {
+                              resolve();
+                            });
+                          }
+                        });
+                      }
+                      _context.next = 4;
+                      return _GLOBAL2.default.pending[url];
+
+                    case 4:
+                      delete _GLOBAL2.default.pending[url];
+                      instance = script.get();
+
+                      if (instance) {
+                        _context.next = 8;
+                        break;
+                      }
+
+                      throw new Error('A script was loaded successfully from ' + url + ', but the ' + 'module returned undefined. Perhaps the \'get\' function is wrong?');
+
+                    case 8:
+                    case 'end':
+                      return _context.stop();
+                  }
+                }
+              }, _callee, _this);
+            })(), 't0', 3);
+
+          case 3:
+            if (!(typeof script.initAsync === 'function')) {
+              _context2.next = 8;
+              break;
+            }
+
+            _context2.next = 6;
+            return script.initAsync(instance);
+
+          case 6:
+            result = _context2.sent;
+
+            if (result !== undefined) {
+              instance = result;
+            }
+
+          case 8:
+            return _context2.abrupt('return', instance);
+
+          case 9:
+          case 'end':
+            return _context2.stop();
         }
+      }
+    }, _callee2, this);
+  }));
 
-        context$1$0.next = 7;
-        return regeneratorRuntime.awrap(script.initAsync(instance));
+  return function (_x) {
+    return ref.apply(this, arguments);
+  };
+}();
 
-      case 7:
-        result = context$1$0.sent;
-
-        if (result !== undefined) {
-          instance = result;
-        }
-
-      case 9:
-        return context$1$0.abrupt('return', instance);
-
-      case 10:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, this);
-};
-
-module.exports = exports['default'];
-},{"../GLOBAL":15,"scriptjs":13}],22:[function(require,module,exports){
-/**
- * @param {String} url
- * @param {Function} success
- */
+},{"../GLOBAL":4,"scriptjs":2}],11:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (url, success) {
+exports.default = function (url, success) {
   var link = document.createElement('link');
   link.href = url;
   link.rel = 'stylesheet';
@@ -2300,16 +1086,17 @@ exports['default'] = function (url, success) {
   document.head.appendChild(link);
 };
 
-;
-module.exports = exports['default'];
-},{}],23:[function(require,module,exports){
+; /**
+   * @param {String} url
+   * @param {Function} success
+   */
+
+},{}],12:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _GLOBAL = require('../GLOBAL');
 
@@ -2327,61 +1114,67 @@ var _styleIsLoaded = require('./styleIsLoaded');
 
 var _styleIsLoaded2 = _interopRequireDefault(_styleIsLoaded);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
 /**
  * @param {StyleParams} style
  * @returns {Promise}
  */
 
-exports['default'] = function callee$0$0(style) {
-  var url;
-  return regeneratorRuntime.async(function callee$0$0$(context$1$0) {
-    while (1) switch (context$1$0.prev = context$1$0.next) {
-      case 0:
-        if (!(!style.match || !(0, _styleIsLoaded2['default'])(style.match))) {
-          context$1$0.next = 6;
-          break;
+exports.default = function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(style) {
+    var url;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!(!style.match || !(0, _styleIsLoaded2.default)(style.match))) {
+              _context.next = 6;
+              break;
+            }
+
+            url = typeof style.url === 'function' ? style.url() : style.url;
+
+            if (!_GLOBAL2.default.pending[url]) {
+              _GLOBAL2.default.pending[url] = new Promise(function (resolve) {
+                (0, _loadStyle2.default)(url, function () {
+                  if (style.match && !(0, _styleIsLoaded2.default)(style.match)) {
+                    console.warn('A style was successfully loaded from ' + url + ', but the ' + 'match expression returned false.');
+                  }
+                  (0, _moveStyleToTop2.default)(url, style.order);
+                  resolve();
+                });
+              });
+            }
+            _context.next = 5;
+            return _GLOBAL2.default.pending[url];
+
+          case 5:
+            delete _GLOBAL2.default.pending[url];
+
+          case 6:
+          case 'end':
+            return _context.stop();
         }
+      }
+    }, _callee, this);
+  }));
 
-        url = typeof style.url === 'function' ? style.url() : style.url;
+  return function (_x) {
+    return ref.apply(this, arguments);
+  };
+}();
 
-        if (!_GLOBAL2['default'].pending[url]) {
-          _GLOBAL2['default'].pending[url] = new Promise(function (resolve) {
-            (0, _loadStyle2['default'])(url, function () {
-              if (style.match && !(0, _styleIsLoaded2['default'])(style.match)) {
-                console.warn('A style was successfully loaded from ' + url + ', but the ' + 'match expression returned false.');
-              }
-              (0, _moveStyleToTop2['default'])(url, style.order);
-              resolve();
-            });
-          });
-        }
-        context$1$0.next = 5;
-        return regeneratorRuntime.awrap(_GLOBAL2['default'].pending[url]);
-
-      case 5:
-        delete _GLOBAL2['default'].pending[url];
-
-      case 6:
-      case 'end':
-        return context$1$0.stop();
-    }
-  }, null, this);
-};
-
-module.exports = exports['default'];
-},{"../GLOBAL":15,"./loadStyle":22,"./moveStyleToTop":24,"./styleIsLoaded":25}],24:[function(require,module,exports){
-/**
- * Moves the stylesheet with the specified href to the top of the cascade.
- * @param {String} href
- * @param {Number} [order]
- */
+},{"../GLOBAL":4,"./loadStyle":11,"./moveStyleToTop":13,"./styleIsLoaded":14}],13:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (href, order) {
+exports.default = function (href, order) {
   order = order || 0;
   var style = queryFirst('link[href=\'' + href + '\'][rel=stylesheet]');
   style.setAttribute('data-order', order);
@@ -2409,6 +1202,11 @@ exports['default'] = function (href, order) {
 /**
  * @param {Node} newNode
  * @param {Node} referenceNode
+ */
+/**
+ * Moves the stylesheet with the specified href to the top of the cascade.
+ * @param {String} href
+ * @param {Number} [order]
  */
 function insertBefore(newNode, referenceNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode);
@@ -2461,19 +1259,15 @@ function queryFirst(selector) {
 function queryAll(selector) {
   return document.querySelectorAll(selector);
 }
-module.exports = exports['default'];
-},{}],25:[function(require,module,exports){
-/**
- * @param {MatchParams} match
- * @returns {Boolean}
- */
+
+},{}],14:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (match) {
+exports.default = function (match) {
   var elem = document.createElement('div');
   elem.style.position = 'absolute';
   elem.style.top = '0';
@@ -2494,37 +1288,45 @@ exports['default'] = function (match) {
   return result;
 };
 
-;
-module.exports = exports['default'];
-},{}],26:[function(require,module,exports){
+; /**
+   * @param {MatchParams} match
+   * @returns {Boolean}
+   */
+
+},{}],15:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Kernel = require('./Kernel');
 
 var _Kernel2 = _interopRequireDefault(_Kernel);
 
-var _utilArrayFromTarget = require('./util/arrayFromTarget');
+var _arrayFromTarget = require('./util/arrayFromTarget');
 
-var _utilArrayFromTarget2 = _interopRequireDefault(_utilArrayFromTarget);
+var _arrayFromTarget2 = _interopRequireDefault(_arrayFromTarget);
 
-var Bundle = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Bundle = function () {
   function Bundle(name) {
     _classCallCheck(this, Bundle);
 
     this.name = name;
-    this._kernel = new _Kernel2['default']();
+    this._kernel = new _Kernel2.default();
     this._modules = [];
   }
 
@@ -2596,20 +1398,20 @@ var Bundle = (function () {
       var _ref$transformAsync = _ref.transformAsync;
       var transformAsync = _ref$transformAsync === undefined ? null : _ref$transformAsync;
 
-      var _loop = function (key) {
+      var _loop = function _loop(key) {
         try {
-          var _ret2 = (function () {
+          var _ret2 = function () {
             // Skip ignored paths.
             var skip = false;
             if (ignore instanceof RegExp) {
               skip = ignore.test(key);
             } else {
-              _iteratorNormalCompletion = true;
-              _didIteratorError = false;
-              _iteratorError = undefined;
+              var _iteratorNormalCompletion = true;
+              var _didIteratorError = false;
+              var _iteratorError = undefined;
 
               try {
-                for (_iterator = ignore[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = ignore[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                   var path = _step.value;
 
                   if (/\/$/.test(path)) {
@@ -2629,8 +1431,8 @@ var Bundle = (function () {
                 _iteratorError = err;
               } finally {
                 try {
-                  if (!_iteratorNormalCompletion && _iterator['return']) {
-                    _iterator['return']();
+                  if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
                   }
                 } finally {
                   if (_didIteratorError) {
@@ -2651,7 +1453,7 @@ var Bundle = (function () {
 
             var factory = modules[key];
 
-            var f = (0, _utilArrayFromTarget2['default'])(modules[key]);
+            var f = (0, _arrayFromTarget2.default)(modules[key]);
             var deps = f.slice(0, f.length - 1);
             f = f[f.length - 1];
 
@@ -2724,23 +1526,15 @@ var Bundle = (function () {
             }
 
             _this._modules.push(fullName);
-          })();
+          }();
 
-          if (typeof _ret2 === 'object') return _ret2.v;
+          if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
         } catch (err) {
           throw new Error('Module registration failed for "' + key + '" because [' + err.message + ']');
         }
       };
 
       for (var key in modules) {
-        var _iteratorNormalCompletion;
-
-        var _didIteratorError;
-
-        var _iteratorError;
-
-        var _iterator, _step;
-
         var _ret = _loop(key);
 
         if (_ret === 'continue') continue;
@@ -2752,6 +1546,7 @@ var Bundle = (function () {
      * @param {Bundle} toBundle
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerLink',
     value: function registerLink(fromNamespace, toBundle) {
@@ -2765,6 +1560,7 @@ var Bundle = (function () {
      * @param {Bundle} toBundle
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerInternalLink',
     value: function registerInternalLink(fromNamespace, toBundle) {
@@ -2778,6 +1574,7 @@ var Bundle = (function () {
      * @param {function(): Bundle} toBundleFactory
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerLinkFactory',
     value: function registerLinkFactory(fromNamespace, toBundleFactory) {
@@ -2791,6 +1588,7 @@ var Bundle = (function () {
      * @param {function(): Bundle} toBundleFactory
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerInternalLinkFactory',
     value: function registerInternalLinkFactory(fromNamespace, toBundleFactory) {
@@ -2804,6 +1602,7 @@ var Bundle = (function () {
      * @param {function(): Promise.<Bundle>} toBundleAsyncFactory
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerAsyncLinkFactory',
     value: function registerAsyncLinkFactory(fromNamespace, toBundleAsyncFactory) {
@@ -2817,6 +1616,7 @@ var Bundle = (function () {
      * @param {function(): Promise.<Bundle>} toBundleAsyncFactory
      * @param {String} [toNamespace=""]
      */
+
   }, {
     key: 'registerInternalAsyncLinkFactory',
     value: function registerInternalAsyncLinkFactory(fromNamespace, toBundleAsyncFactory) {
@@ -2830,6 +1630,7 @@ var Bundle = (function () {
      * @param {Bundle} toBundle
      * @param {String} [toName]
      */
+
   }, {
     key: 'delegate',
     value: function delegate(name, toBundle, toName) {
@@ -2841,6 +1642,7 @@ var Bundle = (function () {
      * @param {Bundle} toBundle
      * @param {String} [toName]
      */
+
   }, {
     key: 'delegateInternal',
     value: function delegateInternal(name, toBundle, toName) {
@@ -2863,23 +1665,31 @@ var Bundle = (function () {
       var _this2 = this;
 
       this.asyncResolvers.push({
-        resolveAsync: function resolveAsync(name, namedNode) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!(!isInternal || namedNode && namedNode.isChildNode)) {
-                  context$3$0.next = 2;
-                  break;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name, namedNode) {
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+              while (1) {
+                switch (_context.prev = _context.next) {
+                  case 0:
+                    if (!(!isInternal || namedNode && namedNode.isChildNode)) {
+                      _context.next = 2;
+                      break;
+                    }
+
+                    return _context.abrupt('return', resolver.resolveAsync(name, namedNode));
+
+                  case 2:
+                  case 'end':
+                    return _context.stop();
                 }
+              }
+            }, _callee, _this2);
+          }));
 
-                return context$3$0.abrupt('return', resolver.resolveAsync(name, namedNode));
-
-              case 2:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this2);
-        }
+          return function resolveAsync(_x8, _x9) {
+            return ref.apply(this, arguments);
+          };
+        }()
       });
     }
 
@@ -2889,6 +1699,7 @@ var Bundle = (function () {
      * @param {String} toNamespace
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerLink',
     value: function _registerLink(fromNamespace, toBundle, toNamespace, isInternal) {
@@ -2902,23 +1713,31 @@ var Bundle = (function () {
         }
       }, isInternal);
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(name) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!name.startsWith(fromNamespace)) {
-                  context$3$0.next = 2;
-                  break;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(name) {
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              while (1) {
+                switch (_context2.prev = _context2.next) {
+                  case 0:
+                    if (!name.startsWith(fromNamespace)) {
+                      _context2.next = 2;
+                      break;
+                    }
+
+                    return _context2.abrupt('return', toBundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
+
+                  case 2:
+                  case 'end':
+                    return _context2.stop();
                 }
+              }
+            }, _callee2, _this3);
+          }));
 
-                return context$3$0.abrupt('return', toBundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
-
-              case 2:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this3);
-        }
+          return function resolveAsync(_x10) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
 
@@ -2928,12 +1747,13 @@ var Bundle = (function () {
      * @param {String} toNamespace
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerLinkFactory',
     value: function _registerLinkFactory(fromNamespace, toBundleFactory, toNamespace, isInternal) {
       var _this4 = this;
 
-      var bundle = undefined;
+      var bundle = void 0;
       this.registerResolver({
         resolve: function resolve(name) {
           if (name.startsWith(fromNamespace)) {
@@ -2945,26 +1765,34 @@ var Bundle = (function () {
         }
       }, isInternal);
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(name) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!name.startsWith(fromNamespace)) {
-                  context$3$0.next = 3;
-                  break;
-                }
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(name) {
+            return regeneratorRuntime.wrap(function _callee3$(_context3) {
+              while (1) {
+                switch (_context3.prev = _context3.next) {
+                  case 0:
+                    if (!name.startsWith(fromNamespace)) {
+                      _context3.next = 3;
+                      break;
+                    }
 
-                if (!bundle) {
-                  bundle = toBundleFactory();
-                }
-                return context$3$0.abrupt('return', bundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
+                    if (!bundle) {
+                      bundle = toBundleFactory();
+                    }
+                    return _context3.abrupt('return', bundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
 
-              case 3:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this4);
-        }
+                  case 3:
+                  case 'end':
+                    return _context3.stop();
+                }
+              }
+            }, _callee3, _this4);
+          }));
+
+          return function resolveAsync(_x11) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
 
@@ -2974,42 +1802,51 @@ var Bundle = (function () {
      * @param {String} toNamespace
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_registerAsyncLinkFactory',
     value: function _registerAsyncLinkFactory(fromNamespace, toBundleAsyncFactory, toNamespace, isInternal) {
       var _this5 = this;
 
-      var bundle = undefined;
+      var bundle = void 0;
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(name) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!name.startsWith(fromNamespace)) {
-                  context$3$0.next = 6;
-                  break;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(name) {
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+              while (1) {
+                switch (_context4.prev = _context4.next) {
+                  case 0:
+                    if (!name.startsWith(fromNamespace)) {
+                      _context4.next = 6;
+                      break;
+                    }
+
+                    if (bundle) {
+                      _context4.next = 5;
+                      break;
+                    }
+
+                    _context4.next = 4;
+                    return toBundleAsyncFactory();
+
+                  case 4:
+                    bundle = _context4.sent;
+
+                  case 5:
+                    return _context4.abrupt('return', bundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
+
+                  case 6:
+                  case 'end':
+                    return _context4.stop();
                 }
+              }
+            }, _callee4, _this5);
+          }));
 
-                if (bundle) {
-                  context$3$0.next = 5;
-                  break;
-                }
-
-                context$3$0.next = 4;
-                return regeneratorRuntime.awrap(toBundleAsyncFactory());
-
-              case 4:
-                bundle = context$3$0.sent;
-
-              case 5:
-                return context$3$0.abrupt('return', bundle._kernel.factoryForAsync(toNamespace + name.substr(fromNamespace.length)));
-
-              case 6:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this5);
-        }
+          return function resolveAsync(_x12) {
+            return ref.apply(this, arguments);
+          };
+        }()
       }, isInternal);
     }
 
@@ -3019,6 +1856,7 @@ var Bundle = (function () {
      * @param {String} toName
      * @param {Boolean} isInternal
      */
+
   }, {
     key: '_delegate',
     value: function _delegate(name, toBundle, toName, isInternal) {
@@ -3036,23 +1874,31 @@ var Bundle = (function () {
         }
       }, isInternal);
       this.registerAsyncResolver({
-        resolveAsync: function resolveAsync(target) {
-          return regeneratorRuntime.async(function resolveAsync$(context$3$0) {
-            while (1) switch (context$3$0.prev = context$3$0.next) {
-              case 0:
-                if (!(key === target)) {
-                  context$3$0.next = 2;
-                  break;
+        resolveAsync: function () {
+          var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(target) {
+            return regeneratorRuntime.wrap(function _callee5$(_context5) {
+              while (1) {
+                switch (_context5.prev = _context5.next) {
+                  case 0:
+                    if (!(key === target)) {
+                      _context5.next = 2;
+                      break;
+                    }
+
+                    return _context5.abrupt('return', toBundle._kernel.factoryForAsync(toName));
+
+                  case 2:
+                  case 'end':
+                    return _context5.stop();
                 }
+              }
+            }, _callee5, _this6);
+          }));
 
-                return context$3$0.abrupt('return', toBundle._kernel.factoryForAsync(toName));
-
-              case 2:
-              case 'end':
-                return context$3$0.stop();
-            }
-          }, null, _this6);
-        }
+          return function resolveAsync(_x13) {
+            return ref.apply(this, arguments);
+          };
+        }()
       });
     }
   }, {
@@ -3078,12 +1924,12 @@ var Bundle = (function () {
   }]);
 
   return Bundle;
-})();
+}();
 
-exports['default'] = Bundle;
+exports.default = Bundle;
 ;
-module.exports = exports['default'];
-},{"./Kernel":29,"./util/arrayFromTarget":38}],27:[function(require,module,exports){
+
+},{"./Kernel":18,"./util/arrayFromTarget":27}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3126,51 +1972,81 @@ function Component(recipe) {
   this.prep = [];
 };
 
-exports["default"] = Component;
+exports.default = Component;
 ;
-module.exports = exports["default"];
-},{}],28:[function(require,module,exports){
+
+},{}],17:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var InvalidOperationError = (function (_Error) {
-  _inherits(InvalidOperationError, _Error);
+function _extendableBuiltin(cls) {
+  function ExtendableBuiltin() {
+    var instance = Reflect.construct(cls, Array.from(arguments));
+    Object.setPrototypeOf(instance, Object.getPrototypeOf(this));
+    return instance;
+  }
+
+  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
+    constructor: {
+      value: cls,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ExtendableBuiltin, cls);
+  } else {
+    ExtendableBuiltin.__proto__ = cls;
+  }
+
+  return ExtendableBuiltin;
+}
+
+var InvalidOperationError = function (_extendableBuiltin2) {
+  _inherits(InvalidOperationError, _extendableBuiltin2);
 
   function InvalidOperationError(message) {
     _classCallCheck(this, InvalidOperationError);
 
-    _get(Object.getPrototypeOf(InvalidOperationError.prototype), 'constructor', this).call(this);
-    this.name = 'InvalidOperationError';
-    this.message = message;
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(InvalidOperationError).call(this, message));
+
+    _this.name = 'InvalidOperationError';
+    _this.message = message;
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(_this, _this.constructor);
+    } else {
+      _this.stack = new Error(message).stack;
+    }
+    return _this;
   }
 
   return InvalidOperationError;
-})(Error);
+}(_extendableBuiltin(Error));
 
-exports['default'] = InvalidOperationError;
-;
-module.exports = exports['default'];
-},{}],29:[function(require,module,exports){
+exports.default = InvalidOperationError;
+
+},{}],18:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _LazyResolver = require('./LazyResolver');
 
@@ -3198,25 +2074,31 @@ var _Registry2 = _interopRequireDefault(_Registry);
 
 var _util = require('./util');
 
-var Kernel = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Kernel = function () {
   function Kernel() {
     _classCallCheck(this, Kernel);
 
-    this._registry = new _Registry2['default']();
-    this._linker = new _Linker2['default']();
+    this._registry = new _Registry2.default();
+    this._linker = new _Linker2.default();
     this._linker.delegate = this._registry;
-    this._registry.resolvers.push(new _LazyResolver2['default'](this));
-    this._registry.resolvers.push(new _OptionalResolver2['default'](this));
-    this._registry.asyncResolvers.push(new _OptionalResolver2['default'](this));
-    this.localResolvers = [new _OptionalLocalResolver2['default'](this)];
+    this._registry.resolvers.push(new _LazyResolver2.default(this));
+    this._registry.resolvers.push(new _OptionalResolver2.default(this));
+    this._registry.asyncResolvers.push(new _OptionalResolver2.default(this));
+    this.localResolvers = [new _OptionalLocalResolver2.default(this)];
   }
 
   /**
    * @returns {Array.<ResolveHandler>}
    */
 
+
   _createClass(Kernel, [{
     key: 'resolve',
+
 
     /**
      * Resolves a named service.
@@ -3234,6 +2116,7 @@ var Kernel = (function () {
      * @param {String} name
      * @returns {Promise}
      */
+
   }, {
     key: 'resolveAsync',
     value: function resolveAsync(name) {
@@ -3255,6 +2138,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {*}
      */
+
   }, {
     key: 'invoke',
     value: function invoke(name, target, locals) {
@@ -3282,6 +2166,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {*}
      */
+
   }, {
     key: 'invokeChild',
     value: function invokeChild(name, target, locals) {
@@ -3294,6 +2179,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {Promise.<*>}
      */
+
   }, {
     key: 'invokeAsync',
     value: function invokeAsync(name, target, locals) {
@@ -3309,6 +2195,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {Promise.<*>}
      */
+
   }, {
     key: 'invokeChildAsync',
     value: function invokeChildAsync(name, target, locals) {
@@ -3323,6 +2210,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {Function}
      */
+
   }, {
     key: 'factoryFrom',
     value: function factoryFrom(name, target, locals) {
@@ -3335,6 +2223,7 @@ var Kernel = (function () {
      * @param {Object.<String, *>} [locals]
      * @returns {Promise.<Function>}
      */
+
   }, {
     key: 'factoryFromAsync',
     value: function factoryFromAsync(name, target, locals) {
@@ -3355,6 +2244,7 @@ var Kernel = (function () {
      * @param {String} name
      * @returns {Function}
      */
+
   }, {
     key: 'factoryFor',
     value: function factoryFor(name) {
@@ -3367,6 +2257,7 @@ var Kernel = (function () {
      * @param {String} name
      * @returns {Promise.<Function>}
      */
+
   }, {
     key: 'factoryForAsync',
     value: function factoryForAsync(name) {
@@ -3380,6 +2271,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {*} value
      */
+
   }, {
     key: 'register',
     value: function register(name, value) {
@@ -3399,6 +2291,7 @@ var Kernel = (function () {
      * Unregisters a name from the kernel.
      * @param {String} name
      */
+
   }, {
     key: 'unregister',
     value: function unregister(name) {
@@ -3411,6 +2304,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {Target} factory
      */
+
   }, {
     key: 'registerFactory',
     value: function registerFactory(name, factory) {
@@ -3424,6 +2318,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {Target} factory
      */
+
   }, {
     key: 'registerFactoryAsSingleton',
     value: function registerFactoryAsSingleton(name, factory) {
@@ -3436,6 +2331,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {AsyncFactory} factory
      */
+
   }, {
     key: 'registerAsyncFactory',
     value: function registerAsyncFactory(name, factory) {
@@ -3448,6 +2344,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {AsyncFactory} factory
      */
+
   }, {
     key: 'registerAsyncFactoryAsSingleton',
     value: function registerAsyncFactoryAsSingleton(name, factory) {
@@ -3467,6 +2364,7 @@ var Kernel = (function () {
      * @param {String} name
      * @param {String} originalName
      */
+
   }, {
     key: 'registerAlias',
     value: function registerAlias(aliasName, originalName) {
@@ -3484,6 +2382,7 @@ var Kernel = (function () {
      * @param {Pattern} pattern
      * @param {ResolveHandler} handler
      */
+
   }, {
     key: 'delegate',
     value: function delegate(pattern, handler) {
@@ -3502,6 +2401,7 @@ var Kernel = (function () {
      * @param {Pattern} pattern
      * @param {AsyncResolveHandler} handler
      */
+
   }, {
     key: 'delegateAsync',
     value: function delegateAsync(pattern, handler) {
@@ -3523,6 +2423,7 @@ var Kernel = (function () {
      * @param {String} namespace
      * @param {Kernel} kernel
      */
+
   }, {
     key: 'delegateNamespace',
     value: function delegateNamespace(namespace, kernel) {
@@ -3548,6 +2449,7 @@ var Kernel = (function () {
      * @param {String} name
      * @returns {Target|undefined}
      */
+
   }, {
     key: 'targetForName',
     value: function targetForName(name) {
@@ -3558,6 +2460,7 @@ var Kernel = (function () {
      * @param {String} name
      * @returns {AsyncTarget|undefined}
      */
+
   }, {
     key: 'asyncTargetForName',
     value: function asyncTargetForName(name) {
@@ -3566,16 +2469,16 @@ var Kernel = (function () {
       if (this._registry.asyncTargets[name]) {
         return this._registry.asyncTargets[name];
       } else if (this._registry.targets[name]) {
-        var _ret = (function () {
+        var _ret = function () {
           var target = _this._registry.targets[name];
           return {
-            v: function () {
+            v: function v() {
               return Promise.resolve(target);
             }
           };
-        })();
+        }();
 
-        if (typeof _ret === 'object') return _ret.v;
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
     }
 
@@ -3587,6 +2490,7 @@ var Kernel = (function () {
      *   kernel is consulted.
      * @returns {Recipe}
      */
+
   }, {
     key: '_recipeFromArgs',
     value: function _recipeFromArgs(name, target, locals) {
@@ -3625,7 +2529,7 @@ var Kernel = (function () {
   }, {
     key: '_childRecipeFromArgs',
     value: function _childRecipeFromArgs(name, target, locals) {
-      return new _Recipe2['default']({
+      return new _Recipe2.default({
         create: function create(x) {
           return x;
         },
@@ -3674,11 +2578,12 @@ var Kernel = (function () {
     key: 'resolvers',
     get: function get() {
       return this._registry.resolvers;
-    },
+    }
 
     /**
      * @param {Array.<ResolveHandler>} value
      */
+    ,
     set: function set(value) {
       this._registry.resolvers = value;
     }
@@ -3686,15 +2591,17 @@ var Kernel = (function () {
     /**
      * @returns {Array.<AsyncResolveHandler}
      */
+
   }, {
     key: 'asyncResolvers',
     get: function get() {
       return this._registry.asyncResolvers;
-    },
+    }
 
     /**
      * @param {Array.<AsyncResolveHandler} value
      */
+    ,
     set: function set(value) {
       this._registry.asyncResolvers = value;
     }
@@ -3702,38 +2609,40 @@ var Kernel = (function () {
     /**
      * @returns {Array.<RedirectHandler}
      */
+
   }, {
     key: 'redirects',
     get: function get() {
       return this._registry.redirects;
-    },
+    }
 
     /**
      * @param {Array.<RedirectHandler} value
      */
+    ,
     set: function set(value) {
       this._registry.redirects = value;
     }
   }]);
 
   return Kernel;
-})();
+}();
 
-exports['default'] = Kernel;
+exports.default = Kernel;
 ;
-module.exports = exports['default'];
-},{"./LazyResolver":30,"./Linker":31,"./OptionalLocalResolver":32,"./OptionalResolver":33,"./Recipe":34,"./Registry":35,"./util":41}],30:[function(require,module,exports){
+
+},{"./LazyResolver":19,"./Linker":20,"./OptionalLocalResolver":21,"./OptionalResolver":22,"./Recipe":23,"./Registry":24,"./util":30}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var LazyResolver = (function () {
+var LazyResolver = function () {
   function LazyResolver(kernel) {
     _classCallCheck(this, LazyResolver);
 
@@ -3745,6 +2654,7 @@ var LazyResolver = (function () {
    * @param {String} name
    * @param {NamedNode} [namedNode]
    */
+
 
   _createClass(LazyResolver, [{
     key: "resolve",
@@ -3758,7 +2668,7 @@ var LazyResolver = (function () {
           if (!promise) {
             (function () {
               promise = Promise.resolve();
-              var promise2 = undefined;
+              var promise2 = void 0;
               // Only resolve things once the promise is awaited on.
               promise.then = function () {
                 for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -3790,23 +2700,20 @@ var LazyResolver = (function () {
   }]);
 
   return LazyResolver;
-})();
+}();
 
-exports["default"] = LazyResolver;
+exports.default = LazyResolver;
 ;
-module.exports = exports["default"];
-},{}],31:[function(require,module,exports){
+
+},{}],20:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Recipe = require('./Recipe');
 
@@ -3822,7 +2729,11 @@ var _InvalidOperationError = require('./InvalidOperationError');
 
 var _InvalidOperationError2 = _interopRequireDefault(_InvalidOperationError);
 
-var Linker = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Linker = function () {
   function Linker() {
     _classCallCheck(this, Linker);
 
@@ -3837,6 +2748,7 @@ var Linker = (function () {
    * @returns {Function}
    */
 
+
   _createClass(Linker, [{
     key: 'factoryFromRecipe',
     value: function factoryFromRecipe(recipe) {
@@ -3845,7 +2757,7 @@ var Linker = (function () {
       var component = this._componentFromRecipe(recipe);
       var stack = [component];
 
-      var _loop = function () {
+      var _loop = function _loop() {
         var component = stack.shift();
         component.recipe.ingredients.forEach(function (ingredient, index) {
           var recipe;
@@ -3854,7 +2766,7 @@ var Linker = (function () {
               name: component.recipe.name,
               isChildNode: !!component.parent
             });
-          } else if (ingredient instanceof _Recipe2['default']) {
+          } else if (ingredient instanceof _Recipe2.default) {
             recipe = ingredient;
           } else {
             recipe = (0, _util.recipeFromTarget)(ingredient);
@@ -3874,6 +2786,7 @@ var Linker = (function () {
      * @param {Recipe} recipe
      * @returns {Promise.<Function>}
      */
+
   }, {
     key: 'factoryFromRecipeAsync',
     value: function factoryFromRecipeAsync(recipe) {
@@ -3892,7 +2805,7 @@ var Linker = (function () {
               var recipe;
               if (typeof ingredient === 'string') {
                 recipe = recipes[ingredient];
-              } else if (ingredient instanceof _Recipe2['default']) {
+              } else if (ingredient instanceof _Recipe2.default) {
                 recipe = ingredient;
               } else {
                 recipe = (0, _util.recipeFromTarget)(ingredient);
@@ -3911,6 +2824,7 @@ var Linker = (function () {
      * @param {Component} component
      * @returns {Function}
      */
+
   }, {
     key: '_factoryFromComponent',
     value: function _factoryFromComponent(component) {
@@ -3931,9 +2845,9 @@ var Linker = (function () {
         var i = 0,
             len = components.length;
         for (; i < len; i++) {
-          var cmp = components[i];
-          cmp.parent.prep[cmp.order] = cmp.recipe.create.apply(undefined, cmp.prep);
-          cmp.prep = [];
+          var _cmp = components[i];
+          _cmp.parent.prep[_cmp.order] = _cmp.recipe.create.apply(undefined, _cmp.prep);
+          _cmp.prep = [];
         }
         args = component.prep.concat(args);
         component.prep = [];
@@ -3947,6 +2861,7 @@ var Linker = (function () {
      * @param {Number} position
      * @returns {Component}
      */
+
   }, {
     key: '_makeChildComponent',
     value: function _makeChildComponent(parent, recipe, position) {
@@ -3962,6 +2877,7 @@ var Linker = (function () {
     /**
      * @param {Component} component
      */
+
   }, {
     key: '_checkForCircularDependency',
     value: function _checkForCircularDependency(component) {
@@ -3969,7 +2885,7 @@ var Linker = (function () {
       var last = component;
       while (node) {
         if (node.recipe.name !== null && node.recipe.name === component.recipe.name) {
-          throw new _InvalidOperationError2['default']('Detected circular dependency to \'' + component.recipe.name + '\' through \'' + last.recipe.name + '\'.');
+          throw new _InvalidOperationError2.default('Detected circular dependency to \'' + component.recipe.name + '\' through \'' + last.recipe.name + '\'.');
         }
         last = node;
         node = node.parent;
@@ -3981,12 +2897,13 @@ var Linker = (function () {
      * @param {Object} [defaults]
      * @returns {Component}
      */
+
   }, {
     key: '_componentFromRecipe',
     value: function _componentFromRecipe(recipe, defaults) {
       var _this3 = this;
 
-      var component = new _Component2['default'](recipe);
+      var component = new _Component2.default(recipe);
       if (defaults) {
         component.parent = defaults.parent;
         component.order = defaults.order;
@@ -4006,22 +2923,22 @@ var Linker = (function () {
   }]);
 
   return Linker;
-})();
+}();
 
-exports['default'] = Linker;
-module.exports = exports['default'];
-},{"./Component":27,"./InvalidOperationError":28,"./Recipe":34,"./util":41}],32:[function(require,module,exports){
+exports.default = Linker;
+
+},{"./Component":16,"./InvalidOperationError":17,"./Recipe":23,"./util":30}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var OptionalLocalResolver = (function () {
+var OptionalLocalResolver = function () {
   function OptionalLocalResolver(kernel) {
     _classCallCheck(this, OptionalLocalResolver);
 
@@ -4034,6 +2951,7 @@ var OptionalLocalResolver = (function () {
    * @param {Object} locals
    */
 
+
   _createClass(OptionalLocalResolver, [{
     key: "resolve",
     value: function resolve(name, locals) {
@@ -4045,23 +2963,23 @@ var OptionalLocalResolver = (function () {
   }]);
 
   return OptionalLocalResolver;
-})();
+}();
 
-exports["default"] = OptionalLocalResolver;
+exports.default = OptionalLocalResolver;
 ;
-module.exports = exports["default"];
-},{}],33:[function(require,module,exports){
+
+},{}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var OptionalResolver = (function () {
+var OptionalResolver = function () {
   function OptionalResolver(kernel) {
     _classCallCheck(this, OptionalResolver);
 
@@ -4072,6 +2990,7 @@ var OptionalResolver = (function () {
   /**
    * @param {String} name
    */
+
 
   _createClass(OptionalResolver, [{
     key: "resolve",
@@ -4106,23 +3025,23 @@ var OptionalResolver = (function () {
   }]);
 
   return OptionalResolver;
-})();
+}();
 
-exports["default"] = OptionalResolver;
+exports.default = OptionalResolver;
 ;
-module.exports = exports["default"];
-},{}],34:[function(require,module,exports){
+
+},{}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Recipe = (function () {
+var Recipe = function () {
   /**
    * @param {Object} [defaults]
    */
@@ -4153,6 +3072,7 @@ var Recipe = (function () {
    * @returns {Recipe}
    */
 
+
   _createClass(Recipe, [{
     key: "clone",
     value: function clone() {
@@ -4161,23 +3081,20 @@ var Recipe = (function () {
   }]);
 
   return Recipe;
-})();
+}();
 
-exports["default"] = Recipe;
+exports.default = Recipe;
 ;
-module.exports = exports["default"];
-},{}],35:[function(require,module,exports){
+
+},{}],24:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Recipe = require('./Recipe');
 
@@ -4193,7 +3110,11 @@ var _InvalidOperationError = require('./InvalidOperationError');
 
 var _InvalidOperationError2 = _interopRequireDefault(_InvalidOperationError);
 
-var Registry = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Registry = function () {
   function Registry() {
     _classCallCheck(this, Registry);
 
@@ -4229,6 +3150,7 @@ var Registry = (function () {
    * @returns {Recipe}
    */
 
+
   _createClass(Registry, [{
     key: 'recipeForName',
     value: function recipeForName(name, namedNode) {
@@ -4240,6 +3162,7 @@ var Registry = (function () {
      * @param {NamedNode} [namedNode]
      * @returns {Promise.<Object.<String, Recipe>>}
      */
+
   }, {
     key: 'recipesByNameAsync',
     value: function recipesByNameAsync(names, namedNode) {
@@ -4251,8 +3174,8 @@ var Registry = (function () {
       })).then(function (targets) {
         var recipes = {};
         for (var i = 0; i < names.length; i++) {
-          var _name = names[i];
-          recipes[_name] = _this._recipeFromTarget(_name, targets[i]);
+          var name = names[i];
+          recipes[name] = _this._recipeFromTarget(name, targets[i]);
         }
         return recipes;
       });
@@ -4263,6 +3186,7 @@ var Registry = (function () {
      * @param {NamedNode} [namedNode]
      * @returns {String}
      */
+
   }, {
     key: 'resolveName',
     value: function resolveName(name, namedNode) {
@@ -4270,7 +3194,7 @@ var Registry = (function () {
       var history = [];
       while (true) {
         if (history.indexOf(name) > -1) {
-          throw new _InvalidOperationError2['default']('Redirect loop encountered while resolving \'' + name + '\' for \'' + initial + '\'');
+          throw new _InvalidOperationError2.default('Redirect loop encountered while resolving \'' + name + '\' for \'' + initial + '\'');
         } else {
           history.push(name);
         }
@@ -4292,6 +3216,7 @@ var Registry = (function () {
      * @param {Target} target
      * @returns {Recipe}
      */
+
   }, {
     key: '_recipeFromTarget',
     value: function _recipeFromTarget(name, target) {
@@ -4300,7 +3225,7 @@ var Registry = (function () {
       var ingredients = _recipeFromTarget2.ingredients;
       var create = _recipeFromTarget2.create;
 
-      return new _Recipe2['default']({
+      return new _Recipe2.default({
         name: name,
         create: create,
         ingredients: ingredients
@@ -4312,6 +3237,7 @@ var Registry = (function () {
      * @param {NamedNode} [namedNode]
      * @returns {Target}
      */
+
   }, {
     key: '_locateTarget',
     value: function _locateTarget(name, namedNode) {
@@ -4326,7 +3252,7 @@ var Registry = (function () {
         if (namedNode && namedNode.name) {
           message += ' for \'' + namedNode.name + '\'';
         }
-        throw new _ServiceNotFoundError2['default'](message);
+        throw new _ServiceNotFoundError2.default(message);
       } else {
         (0, _util.validateTarget)(target);
       }
@@ -4338,6 +3264,7 @@ var Registry = (function () {
      * @param {NamedNode} [namedNode]
      * @returns {Promise.<Target>}
      */
+
   }, {
     key: '_locateTargetAsync',
     value: function _locateTargetAsync(name, namedNode) {
@@ -4370,86 +3297,116 @@ var Registry = (function () {
   }]);
 
   return Registry;
-})();
+}();
 
-exports['default'] = Registry;
+exports.default = Registry;
 ;
-module.exports = exports['default'];
-},{"./InvalidOperationError":28,"./Recipe":34,"./ServiceNotFoundError":36,"./util":41}],36:[function(require,module,exports){
+
+},{"./InvalidOperationError":17,"./Recipe":23,"./ServiceNotFoundError":25,"./util":30}],25:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ServiceNotFoundError = (function (_Error) {
-  _inherits(ServiceNotFoundError, _Error);
+function _extendableBuiltin(cls) {
+  function ExtendableBuiltin() {
+    var instance = Reflect.construct(cls, Array.from(arguments));
+    Object.setPrototypeOf(instance, Object.getPrototypeOf(this));
+    return instance;
+  }
+
+  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
+    constructor: {
+      value: cls,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ExtendableBuiltin, cls);
+  } else {
+    ExtendableBuiltin.__proto__ = cls;
+  }
+
+  return ExtendableBuiltin;
+}
+
+var ServiceNotFoundError = function (_extendableBuiltin2) {
+  _inherits(ServiceNotFoundError, _extendableBuiltin2);
 
   function ServiceNotFoundError(message) {
     _classCallCheck(this, ServiceNotFoundError);
 
-    _get(Object.getPrototypeOf(ServiceNotFoundError.prototype), 'constructor', this).call(this);
-    this.name = 'ServiceNotFoundError';
-    this.message = message;
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ServiceNotFoundError).call(this, message));
+
+    _this.name = 'ServiceNotFoundError';
+    _this.message = message;
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(_this, _this.constructor);
+    } else {
+      _this.stack = new Error(message).stack;
+    }
+    return _this;
   }
 
   return ServiceNotFoundError;
-})(Error);
+}(_extendableBuiltin(Error));
 
-exports['default'] = ServiceNotFoundError;
-;
-module.exports = exports['default'];
-},{}],37:[function(require,module,exports){
+exports.default = ServiceNotFoundError;
+
+},{}],26:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ServiceNotFoundError = exports.LazyResolver = exports.Kernel = exports.InvalidOperationError = exports.Bundle = undefined;
+
+var _Bundle2 = require('./Bundle');
+
+var _Bundle3 = _interopRequireDefault(_Bundle2);
+
+var _InvalidOperationError2 = require('./InvalidOperationError');
+
+var _InvalidOperationError3 = _interopRequireDefault(_InvalidOperationError2);
+
+var _Kernel2 = require('./Kernel');
+
+var _Kernel3 = _interopRequireDefault(_Kernel2);
+
+var _LazyResolver2 = require('./LazyResolver');
+
+var _LazyResolver3 = _interopRequireDefault(_LazyResolver2);
+
+var _ServiceNotFoundError2 = require('./ServiceNotFoundError');
+
+var _ServiceNotFoundError3 = _interopRequireDefault(_ServiceNotFoundError2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.Bundle = _Bundle3.default;
+exports.InvalidOperationError = _InvalidOperationError3.default;
+exports.Kernel = _Kernel3.default;
+exports.LazyResolver = _LazyResolver3.default;
+exports.ServiceNotFoundError = _ServiceNotFoundError3.default;
+
+},{"./Bundle":15,"./InvalidOperationError":17,"./Kernel":18,"./LazyResolver":19,"./ServiceNotFoundError":25}],27:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _Bundle = require('./Bundle');
-
-var _Bundle2 = _interopRequireDefault(_Bundle);
-
-var _InvalidOperationError = require('./InvalidOperationError');
-
-var _InvalidOperationError2 = _interopRequireDefault(_InvalidOperationError);
-
-var _Kernel = require('./Kernel');
-
-var _Kernel2 = _interopRequireDefault(_Kernel);
-
-var _LazyResolver = require('./LazyResolver');
-
-var _LazyResolver2 = _interopRequireDefault(_LazyResolver);
-
-var _ServiceNotFoundError = require('./ServiceNotFoundError');
-
-var _ServiceNotFoundError2 = _interopRequireDefault(_ServiceNotFoundError);
-
-exports['default'] = {
-  Bundle: _Bundle2['default'],
-  InvalidOperationError: _InvalidOperationError2['default'],
-  Kernel: _Kernel2['default'],
-  LazyResolver: _LazyResolver2['default'],
-  ServiceNotFoundError: _ServiceNotFoundError2['default']
-};
-module.exports = exports['default'];
-},{"./Bundle":26,"./InvalidOperationError":28,"./Kernel":29,"./LazyResolver":30,"./ServiceNotFoundError":36}],38:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-exports['default'] = function (target) {
+exports.default = function (target) {
   var deps;
   if (typeof target === 'function') {
     deps = target.$inject || [];
@@ -4461,20 +3418,15 @@ exports['default'] = function (target) {
 };
 
 ;
-module.exports = exports['default'];
-},{}],39:[function(require,module,exports){
-/**
- * Safely combines multiple path segments.
- * @param {...String} paths
- * @returns {String}
- */
+
+},{}],28:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function () {
+exports.default = function () {
   for (var _len = arguments.length, paths = Array(_len), _key = 0; _key < _len; _key++) {
     paths[_key] = arguments[_key];
   }
@@ -4484,20 +3436,20 @@ exports['default'] = function () {
   }).join('/');
 };
 
-;
-module.exports = exports['default'];
-},{}],40:[function(require,module,exports){
-/**
- * @param {Array} items
- * @returns {Array}
- */
+; /**
+   * Safely combines multiple path segments.
+   * @param {...String} paths
+   * @returns {String}
+   */
+
+},{}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports["default"] = function (items) {
+exports.default = function (items) {
   return items.reduce(function (acc, item) {
     if (acc.indexOf(item) === -1) {
       return acc.concat([item]);
@@ -4506,62 +3458,60 @@ exports["default"] = function (items) {
   }, []);
 };
 
-;
-module.exports = exports["default"];
-},{}],41:[function(require,module,exports){
+; /**
+   * @param {Array} items
+   * @returns {Array}
+   */
+
+},{}],30:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.validateTarget = exports.recipeFromTarget = exports.matchFromPattern = exports.distinct = exports.combinePaths = exports.arrayFromTarget = undefined;
+
+var _arrayFromTarget2 = require('./arrayFromTarget');
+
+var _arrayFromTarget3 = _interopRequireDefault(_arrayFromTarget2);
+
+var _combinePaths2 = require('./combinePaths');
+
+var _combinePaths3 = _interopRequireDefault(_combinePaths2);
+
+var _distinct2 = require('./distinct');
+
+var _distinct3 = _interopRequireDefault(_distinct2);
+
+var _matchFromPattern2 = require('./matchFromPattern');
+
+var _matchFromPattern3 = _interopRequireDefault(_matchFromPattern2);
+
+var _recipeFromTarget2 = require('./recipeFromTarget');
+
+var _recipeFromTarget3 = _interopRequireDefault(_recipeFromTarget2);
+
+var _validateTarget2 = require('./validateTarget');
+
+var _validateTarget3 = _interopRequireDefault(_validateTarget2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.arrayFromTarget = _arrayFromTarget3.default;
+exports.combinePaths = _combinePaths3.default;
+exports.distinct = _distinct3.default;
+exports.matchFromPattern = _matchFromPattern3.default;
+exports.recipeFromTarget = _recipeFromTarget3.default;
+exports.validateTarget = _validateTarget3.default;
+
+},{"./arrayFromTarget":27,"./combinePaths":28,"./distinct":29,"./matchFromPattern":31,"./recipeFromTarget":32,"./validateTarget":33}],31:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _arrayFromTarget = require('./arrayFromTarget');
-
-var _arrayFromTarget2 = _interopRequireDefault(_arrayFromTarget);
-
-var _combinePaths = require('./combinePaths');
-
-var _combinePaths2 = _interopRequireDefault(_combinePaths);
-
-var _distinct = require('./distinct');
-
-var _distinct2 = _interopRequireDefault(_distinct);
-
-var _matchFromPattern = require('./matchFromPattern');
-
-var _matchFromPattern2 = _interopRequireDefault(_matchFromPattern);
-
-var _recipeFromTarget = require('./recipeFromTarget');
-
-var _recipeFromTarget2 = _interopRequireDefault(_recipeFromTarget);
-
-var _validateTarget = require('./validateTarget');
-
-var _validateTarget2 = _interopRequireDefault(_validateTarget);
-
-exports['default'] = {
-  arrayFromTarget: _arrayFromTarget2['default'],
-  combinePaths: _combinePaths2['default'],
-  distinct: _distinct2['default'],
-  matchFromPattern: _matchFromPattern2['default'],
-  recipeFromTarget: _recipeFromTarget2['default'],
-  validateTarget: _validateTarget2['default']
-};
-module.exports = exports['default'];
-},{"./arrayFromTarget":38,"./combinePaths":39,"./distinct":40,"./matchFromPattern":42,"./recipeFromTarget":43,"./validateTarget":44}],42:[function(require,module,exports){
-/**
- * @param {Pattern} pattern
- * @returns {Function}
- */
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-exports['default'] = function (pattern) {
+exports.default = function (pattern) {
   if (typeof pattern === 'function') {
     return pattern;
   }
@@ -4575,16 +3525,25 @@ exports['default'] = function (pattern) {
   };
 };
 
-;
-module.exports = exports['default'];
-},{}],43:[function(require,module,exports){
+; /**
+   * @param {Pattern} pattern
+   * @returns {Function}
+   */
+
+},{}],32:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+exports.default = function (target) {
+  target = (0, _arrayFromTarget2.default)(target);
+  return new _Recipe2.default({
+    create: target[target.length - 1],
+    ingredients: target.slice(0, target.length - 1)
+  });
+};
 
 var _Recipe = require('../Recipe');
 
@@ -4594,32 +3553,23 @@ var _arrayFromTarget = require('./arrayFromTarget');
 
 var _arrayFromTarget2 = _interopRequireDefault(_arrayFromTarget);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+;
+
 /**
  * @param {Target} target
  * @returns {Recipe}
  */
 
-exports['default'] = function (target) {
-  target = (0, _arrayFromTarget2['default'])(target);
-  return new _Recipe2['default']({
-    create: target[target.length - 1],
-    ingredients: target.slice(0, target.length - 1)
-  });
-};
-
-;
-module.exports = exports['default'];
-},{"../Recipe":34,"./arrayFromTarget":38}],44:[function(require,module,exports){
-/**
- * @param {Target} target
- */
+},{"../Recipe":23,"./arrayFromTarget":27}],33:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports['default'] = function (target) {
+exports.default = function (target) {
   if (typeof target !== 'function') {
     if (!Array.isArray(target)) {
       throw new Error('Expected target to be an array or function.');
@@ -4630,8 +3580,10 @@ exports['default'] = function (target) {
   }
 };
 
-;
-module.exports = exports['default'];
-},{}]},{},[17])(17)
+; /**
+   * @param {Target} target
+   */
+
+},{}]},{},[6])(6)
 });
-//# sourceMappingURL=dialga.js.map?f9c52dd02af92402b35a2be592dab411a64c9251
+//# sourceMappingURL=dialga.js.map?f77cd22d572f048c6f3e798e6686d62843f202a8

@@ -1,7 +1,12 @@
 export default class ServiceNotFoundError extends Error {
-  constructor( message ) {
-    super();
+  constructor(message) {
+    super(message);
     this.name = 'ServiceNotFoundError';
     this.message = message;
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    } else {
+      this.stack = (new Error(message)).stack;
+    }
   }
-};
+}

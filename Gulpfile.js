@@ -39,10 +39,10 @@ gulp.task( 'watch', function() {
 gulp.task( 'bundle', function() {
   return arceus.js.bundle({
     entry: 'src/browser/index.js',
-    outfile: 'bundle/dialga.js',
+    outfile: 'bundle/palkia.js',
     config: {
       browserify: {
-        standalone: 'Dialga'
+        standalone: 'Palkia'
       }
     }
   });

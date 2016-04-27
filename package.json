@@ -1,5 +1,5 @@
 {
-  "name": "dialga",
+  "name": "palkia",
   "version": "0.4.0",
   "description": "Dependency injection library.",
   "main": "dist/node",
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stephenbunch/dialga"
+    "url": "https://github.com/stephenbunch/palkia"
   },
   "author": "Stephen Bunch",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stephenbunch/dialga/issues"
+    "url": "https://github.com/stephenbunch/palkia/issues"
   },
   "devDependencies": {
     "arceus": "^0.5.0",

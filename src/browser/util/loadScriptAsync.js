@@ -6,11 +6,13 @@ import GLOBAL from '../GLOBAL';
  * @returns {Promise}
  */
 export default async function( script ) {
-  var instance;
+  let instance;
   try {
-    instance = script.get();
+    if ( script.get ) {
+      instance = script.get();
+    }
   } catch ( err ) {}
-  if ( !instance ) {
+  if ( !instance || !script.get ) {
     let url = typeof script.url === 'function' ? script.url() : script.url;
     if ( !GLOBAL.pending[ url ] ) {
       GLOBAL.pending[ url ] = new Promise( resolve => {
@@ -30,12 +32,14 @@ export default async function( script ) {
     }
     await GLOBAL.pending[ url ];
     delete GLOBAL.pending[ url ];
-    instance = script.get();
-    if ( !instance ) {
-      throw new Error(
-        `A script was loaded successfully from ${ url }, but the ` +
-        `module returned undefined. Perhaps the 'get' function is wrong?`
-      );
+    if ( script.get ) {
+      instance = script.get();
+      if ( !instance ) {
+        throw new Error(
+          `A script was loaded successfully from ${ url }, but the ` +
+          `module returned undefined. Perhaps the 'get' function is wrong?`
+        );
+      }
     }
   }
   if ( typeof script.initAsync === 'function' ) {

@@ -977,12 +977,16 @@ exports.default = function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            instance = void 0;
+
             try {
-              instance = script.get();
+              if (script.get) {
+                instance = script.get();
+              }
             } catch (err) {}
 
-            if (instance) {
-              _context2.next = 3;
+            if (!(!instance || !script.get)) {
+              _context2.next = 4;
               break;
             }
 
@@ -1017,43 +1021,49 @@ exports.default = function () {
 
                     case 4:
                       delete _GLOBAL2.default.pending[url];
+
+                      if (!script.get) {
+                        _context.next = 9;
+                        break;
+                      }
+
                       instance = script.get();
 
                       if (instance) {
-                        _context.next = 8;
+                        _context.next = 9;
                         break;
                       }
 
                       throw new Error('A script was loaded successfully from ' + url + ', but the ' + 'module returned undefined. Perhaps the \'get\' function is wrong?');
 
-                    case 8:
+                    case 9:
                     case 'end':
                       return _context.stop();
                   }
                 }
               }, _callee, _this);
-            })(), 't0', 3);
+            })(), 't0', 4);
 
-          case 3:
+          case 4:
             if (!(typeof script.initAsync === 'function')) {
-              _context2.next = 8;
+              _context2.next = 9;
               break;
             }
 
-            _context2.next = 6;
+            _context2.next = 7;
             return script.initAsync(instance);
 
-          case 6:
+          case 7:
             result = _context2.sent;
 
             if (result !== undefined) {
               instance = result;
             }
 
-          case 8:
+          case 9:
             return _context2.abrupt('return', instance);
 
-          case 9:
+          case 10:
           case 'end':
             return _context2.stop();
         }
@@ -3581,4 +3591,4 @@ exports.default = function (target) {
 
 },{}]},{},[6])(6)
 });
-//# sourceMappingURL=palkia.js.map?220bd5521a2574fd47719f1af340f0dc698bde47
+//# sourceMappingURL=palkia.js.map?01b7745759c24a76dfd2ebe790ec2ec3232fd363
